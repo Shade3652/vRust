@@ -2,17 +2,16 @@
 
 
 fn main() {
-    let string: String = String::from("");
+    let mut string: String = String::from("");
     let mut num: String = String::from("");
     let mut num_point: bool  = false;
-    let text: String = String::from("3 / 45 * 678 - 9.0 + 12.3 // 7");
+    let text: String = String::from(" L bozo 3 / 45 * 678 - 9.0 + 12.3 // 7 sigma");
     let mut tokens: Vec<Token> = Vec::new();
 
     //static DOT: LazyLock<String> = LazyLock::new(|| String::from("."));
 
 
     for char in text.chars() {
-        println!("Char: {}", char);
 
 
         if "1234567890.".contains(char) {
@@ -52,6 +51,26 @@ fn main() {
             }
         }
 
+
+        if "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(char) {
+            string.push(char);
+            println!("{}", string);
+        }
+
+        else {
+            if !(string == "") {
+
+                if string.len() == 1 {
+                    tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
+                }
+                else {
+                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
+                }
+                string = String::from("");
+            }
+        }
+
+
         if char == '+' {
             tokens.push(Token {token_type: "PLUS".to_string(), value: "+".to_string()});
         }
@@ -86,6 +105,15 @@ fn main() {
             tokens.push(Token {token_type: "INT".to_string(), value: num.clone()});
         }
         println!("Num: {}", num.clone());
+    }
+
+    if !(string == "") {
+        if string.len() == 1 {
+            tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
+        }
+        else {
+            tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
+        }
     }
 
     for i in &tokens {
