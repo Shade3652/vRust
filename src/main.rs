@@ -7,6 +7,7 @@ fn main() {
     let mut num_point: bool  = false;
     let text: String = String::from(" L bozo 3 / 45 * 678 - 9.0 + 12.3 // 7 sigma");
     let mut tokens: Vec<Token> = Vec::new();
+    let mut lpars: Vec<i32> = Vec::new();
 
     //static DOT: LazyLock<String> = LazyLock::new(|| String::from("."));
 
@@ -93,6 +94,12 @@ fn main() {
             }
         }
 
+        if char == '(' {
+            tokens.push(Token {token_type: "LPAR".to_string(), value: "(".to_string()});
+            lpars.push(tokens.len - 1)
+
+        }
+
     }
 
 
@@ -125,4 +132,9 @@ fn main() {
 struct Token {
     token_type: String,
     value: String,
+}
+
+struct ParPairs {
+    l_id: i32;
+    r_id; i32;
 }
