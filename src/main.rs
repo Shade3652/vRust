@@ -2,27 +2,28 @@
 
 
 fn main() {
-    let mut string: String = String::from("");
+    let mut string: String = String::from("");  //This shit is just declaring vars
     let mut num: String = String::from("");
     let mut num_point: bool  = false;
-    let text: String = String::from(" L bozo 3 / 45 * 678 - 9.0 + 12.3 // 7 sigma");
+    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 // 7 sigma");
     let mut tokens: Vec<Token> = Vec::new();
-    let mut lpars: Vec<i32> = Vec::new();
+    let mut lpars: Vec<usize> = Vec::new();
+    let mut paren_sets: Vec<ParPairs> = Vec::new();
 
-    //static DOT: LazyLock<String> = LazyLock::new(|| String::from("."));
+    //static DOT: LazyLock<String> = LazyLock::new(|| String::from(".")); //OLD CODE FOR OLD DOT
 
 
     for char in text.chars() {
 
 
-        if "1234567890.".contains(char) {
+        if "1234567890.".contains(char) {   //Checks to see if the number being parsed has 2 decimal points
             if num_point && char == '.' {
                 println!("Error: bro a number can't have two points");
             } 
 
-            else {
+            else {  //Otherwise...
 
-                if char == '.' {
+                if char == '.' {    //Corrects number types
                     if num == "" {
                         tokens.push(Token {token_type: "DOT".to_string(), value: ".".to_string()});
                     }
@@ -47,7 +48,7 @@ fn main() {
                     tokens.push(Token {token_type: "INT".to_string(), value: num.clone()});
                 }
                 num_point = false;
-                println!("Num: {}", num.clone());
+
                 num = String::from("");
             }
         }
@@ -55,7 +56,6 @@ fn main() {
 
         if "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(char) {
             string.push(char);
-            println!("{}", string);
         }
 
         else {
@@ -70,6 +70,7 @@ fn main() {
                 string = String::from("");
             }
         }
+
 
 
         if char == '+' {
@@ -96,11 +97,28 @@ fn main() {
 
         if char == '(' {
             tokens.push(Token {token_type: "LPAR".to_string(), value: "(".to_string()});
-            lpars.push(tokens.len - 1)
+            lpars.push(tokens.len() - 1);
 
         }
 
-    }
+
+        if char == ')' {
+            tokens.push(Token {token_type: "RPAR".to_string(), value: ")".to_string()});
+
+            paren_sets.push(ParPairs{l: lpars[lpars.len() - 1], r: (tokens.len() - 1).try_into().unwrap()});
+            lpars.pop();
+
+
+            //P2: Adding a AST object
+            let temp: Vec<Token> = tokens[paren_sets[paren_sets.len() - 1].l + 1.. paren_sets[paren_sets.len() - 1].r].to_vec();
+                for i in temp {
+                    println!("Token: {} | Value: {}", i.token_type, i.value);
+                }
+                println!("______________");
+            }
+   
+        }
+
 
 
 
@@ -111,7 +129,6 @@ fn main() {
         else {
             tokens.push(Token {token_type: "INT".to_string(), value: num.clone()});
         }
-        println!("Num: {}", num.clone());
     }
 
     if !(string == "") {
@@ -123,18 +140,28 @@ fn main() {
         }
     }
 
+
+    let mut count: i8 = 0;
+
     for i in &tokens {
-        println!("Token: {} | Value: {}", i.token_type, i.value);
+        println!("Token: {} | Value: {} ({})", i.token_type, i.value, count);
+        count += 1;
     }
+    println!("______________");
+    for i in paren_sets {
+        println!("L: {} | R: {}", i.l, i.r);
+    }
+
 
 }
 
+#[derive(Clone)]
 struct Token {
     token_type: String,
     value: String,
 }
 
 struct ParPairs {
-    l_id: i32;
-    r_id; i32;
+    l: usize,
+    r: usize,
 }
