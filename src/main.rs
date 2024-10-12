@@ -112,14 +112,12 @@ fn main() {
 
             //P2: Adding a AST object
             let temp: Vec<Token> = tokens[paren_sets[paren_sets.len() - 1].l + 1.. paren_sets[paren_sets.len() - 1].r].to_vec();
-                for i in &temp {
-                    println!("Token: {} | Value: {}", i.token_type, i.value);
+                for _i in &temp {
                     tokens.remove(paren_sets[paren_sets.len() - 1].l + 1);
                 }
 
-                asts.push(AST {childern: temp});
+                asts.push(AST {children: temp});
                 tokens.insert(paren_sets[paren_sets.len() - 1].l + 1, Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string()});
-                println!("______________");
             }
 
    
@@ -158,6 +156,13 @@ fn main() {
         println!("L: {} | R: {}", i.l, i.r);
     }
 
+    for i in asts {
+        println!("______________");
+        for j in i.children {
+            println!("Token: {} | Value: {}", j.token_type, j.value);
+        }
+    }
+
 
 }
 
@@ -173,5 +178,5 @@ struct ParPairs {
 }
 
 struct AST {
-    childern: Vec<Token>,
+    children: Vec<Token>,
 }
