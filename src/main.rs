@@ -5,7 +5,7 @@ fn main() {
     let mut string: String = String::from("");  //This shit is just declaring vars
     let mut num: String = String::from("");
     let mut num_point: bool  = false;
-    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 // 7 sigma");
+    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 // 7 sigma \" lol + sussy\" ");
     let mut tokens: Vec<Token> = Vec::new();
     let mut lpars: Vec<usize> = Vec::new();
     let mut paren_sets: Vec<ParPairs> = Vec::new();
@@ -120,8 +120,50 @@ fn main() {
                 tokens.insert(paren_sets[paren_sets.len() - 1].l + 1, Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string()});
             }
 
-   
+        if char == '"' {
+            tokens.push(Token {token_type: "DQUOTE".to_string(), value: '"'.to_string()});
         }
+
+        if char == '\'' {
+            tokens.push(Token {token_type: "SQUOTE".to_string(), value: '\''.to_string()});
+        }
+
+        if char == '.' {
+            tokens.push(Token {token_type: "DOT".to_string(), value: ".".to_string()});
+        }
+
+        if char == ':' {
+            tokens.push(Token {token_type: "COLON".to_string(), value: ":".to_string()});
+        }
+
+        if char == ';' {
+            tokens.push(Token {token_type: "SEMICOLON".to_string(), value: ";".to_string()});
+        }
+
+        if char == '&' {
+            if tokens[tokens.len() - 1].token_type == "APERSAND" {
+                tokens.pop();
+                tokens.push(Token {token_type: "AND".to_string(), value: "&&".to_string()});
+            }
+            else {
+                tokens.push(Token {token_type: "APERSAND".to_string(), value: "&".to_string()});
+            }
+        }
+
+        if char == '|' {
+            if tokens[tokens.len() - 1].token_type == "LINE" {
+                tokens.pop();
+                tokens.push(Token {token_type: "OR".to_string(), value: "||".to_string()});
+            }
+            else {
+                tokens.push(Token {token_type: "LINE".to_string(), value: "|".to_string()});
+            }
+        }
+
+        if char == '!' {
+            tokens.push(Token {token_type: "NOT".to_string(), value: "!".to_string()});
+        }
+    }
 
 
 
