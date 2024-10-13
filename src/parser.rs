@@ -1,6 +1,6 @@
 //use std::collections::HashMap;
 
-pub(crate) fn main() {
+pub(crate) fn parse() -> (Vec<Token>, Vec<AST>) {
     let mut string: String = String::from("");  //This shit is just declaring vars
     let mut num: String = String::from("");
     let mut num_point: bool  = false;
@@ -127,10 +127,6 @@ pub(crate) fn main() {
             tokens.push(Token {token_type: "SQUOTE".to_string(), value: '\''.to_string()});
         }
 
-        if char == '.' {
-            tokens.push(Token {token_type: "DOT".to_string(), value: ".".to_string()});
-        }
-
         if char == ':' {
             tokens.push(Token {token_type: "COLON".to_string(), value: ":".to_string()});
         }
@@ -197,20 +193,22 @@ pub(crate) fn main() {
         println!("L: {} | R: {}", i.l, i.r);
     }
 
-    for i in asts {
+    for i in &asts {
         println!("______________");
-        for j in i.children {
+        for j in &i.children {
             println!("Token: {} | Value: {}", j.token_type, j.value);
         }
     }
 
 
+    return (tokens, asts);
+
 }
 
 #[derive(Clone)]
-struct Token {
-    token_type: String,
-    value: String,
+pub(crate) struct Token {
+    pub token_type: String,
+    pub value: String,
 }
 
 struct ParPairs {
@@ -218,6 +216,6 @@ struct ParPairs {
     r: usize,
 }
 
-struct AST {
+pub(crate) struct AST {
     children: Vec<Token>,
 }
