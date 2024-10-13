@@ -1,10 +1,9 @@
 //use std::collections::HashMap;
 
-pub(crate) fn parse() -> (Vec<Token>, Vec<AST>) {
+pub fn parse(text: String) -> (Vec<Token>, Vec<AST>) {
     let mut string: String = String::from("");  //This shit is just declaring vars
     let mut num: String = String::from("");
     let mut num_point: bool  = false;
-    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 // 7 sigma \" lol + sussy\" ");
     let mut tokens: Vec<Token> = Vec::new();
     let mut lpars: Vec<usize> = Vec::new();
     let mut paren_sets: Vec<ParPairs> = Vec::new();
@@ -182,7 +181,7 @@ pub(crate) fn parse() -> (Vec<Token>, Vec<AST>) {
     }
 
 
-    let mut count: i8 = 0;
+    /* let mut count: i8 = 0;
 
     for i in &tokens {
         println!("Token: {} | Value: {} ({})", i.token_type, i.value, count);
@@ -198,7 +197,7 @@ pub(crate) fn parse() -> (Vec<Token>, Vec<AST>) {
         for j in &i.children {
             println!("Token: {} | Value: {}", j.token_type, j.value);
         }
-    }
+    } */
 
 
     return (tokens, asts);
@@ -206,7 +205,7 @@ pub(crate) fn parse() -> (Vec<Token>, Vec<AST>) {
 }
 
 #[derive(Clone)]
-pub(crate) struct Token {
+pub struct Token {
     pub token_type: String,
     pub value: String,
 }
@@ -216,6 +215,6 @@ struct ParPairs {
     r: usize,
 }
 
-pub(crate) struct AST {
-    children: Vec<Token>,
+pub struct AST {
+    pub children: Vec<Token>,
 }
