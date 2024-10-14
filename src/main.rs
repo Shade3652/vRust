@@ -2,8 +2,8 @@ mod parser;
 
 
 fn main() {
-    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 // 7 sigma \" lol + sussy\" ");
-    let parsed: (Vec<parser::Token>, Vec<parser::AST>)= parser::parse(text);
+    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14}");
+    let parsed: (Vec<parser::Token>, Vec<parser::AST>, Vec<String>)= parser::parse(text);
     let tokens: Vec<parser::Token> = parsed.0;
     let asts: Vec<parser::AST> = parsed.1;
 
