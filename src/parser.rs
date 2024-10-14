@@ -213,7 +213,7 @@ pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
             tokens.push(Token {token_type: "RBRACKET".to_string(), value: "]".to_string()});
 
             if lbrackets.len() == 0 {
-                println!("Error: bro you can't have a right brace without a left one"); //ERROR
+                println!("Error: bro you can't have a right bracket without a left one"); //ERROR
             }
 
             bracket_sets.push(ParPairs{l: lbrackets[lbrackets.len() - 1], r: (tokens.len() - 1).try_into().unwrap()});
@@ -276,6 +276,16 @@ pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
     if lpars.len() != 0 {
         println!("Error: bro you can't have a left parenthesis without a right one"); //ERROR
     }
+
+    if lbraces.len() != 0 {
+        println!("Error: bro you can't have a left brace without a right one"); //ERROR
+    }
+    
+    if lbrackets.len() != 0 {
+        println!("Error: bro you can't have a left bracket without a right one"); //ERROR
+    }
+
+
     return (tokens, asts, errors);
 
 }
