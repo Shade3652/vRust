@@ -3,14 +3,13 @@ use std::fs;
 
 
 fn main() {
-    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {}");
+    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} ( [ {");
     let parsed: (Vec<parser::Token>, Vec<parser::AST>, Vec<parser::PErr>, i64)= parser::parse(&text);
     let tokens: Vec<parser::Token> = parsed.0;
     let asts: Vec<parser::AST> = parsed.1;
     let errors: Vec<parser::PErr> = parsed.2;
-
-
     let mut count: i32 = 0;
+
 
     if errors.len() == 0 {
 
@@ -32,7 +31,8 @@ fn main() {
 
     else {
         for i in &errors {
-            println!("Error: {} at character {}", i.error, i.char);
+            let chars: Vec<char> = text.chars().collect();
+            println!("Error: {} at character {} sus: {}", i.error, i.char, chars[(i.char - 1) as usize]);
         }
     }
 }

@@ -9,20 +9,20 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
 
-    let mut lbraces: Vec<usize> = Vec::new();   //Brace vars
+    let mut lbraces: Vec<Lstore> = Vec::new();   //Brace vars
     let mut brace_sets: Vec<ParPairs> = Vec::new();
 
-    let mut lpars: Vec<usize> = Vec::new();     //Paren vars
+    let mut lpars: Vec<Lstore> = Vec::new();     //Paren vars
     let mut paren_sets: Vec<ParPairs> = Vec::new();
 
-    let mut lbrackets: Vec<usize> = Vec::new(); //Bracket vars
+    let mut lbrackets: Vec<Lstore> = Vec::new(); //Bracket vars
     let mut bracket_sets: Vec<ParPairs> = Vec::new();
 
     let mut errors: Vec<PErr> = Vec::new();
 
     //static DOT: LazyLock<String> = LazyLock::new(|| String::from(".")); //OLD CODE FOR OLD DOT
 
-    let mut char_num: i64 = 1;
+    let mut char_num: i64 = 0;
     for char in text.chars() {
 
 
@@ -111,7 +111,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
         if char == '(' {
             tokens.push(Token {token_type: "LPAR".to_string(), value: "(".to_string()});
-            lpars.push(tokens.len() - 1);
+            lpars.push(Lstore{par: tokens.len() - 1, char: char_num});
 
         }
 
@@ -126,7 +126,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
                 break;
             }
 
-            paren_sets.push(ParPairs{l: lpars[lpars.len() - 1], r: (tokens.len() - 1).try_into().unwrap()});
+            paren_sets.push(ParPairs{l: lpars[lpars.len() - 1].par, r: (tokens.len() - 1).try_into().unwrap()});
             lpars.pop();
 
             
@@ -193,7 +193,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
         if char == '{' {
             tokens.push(Token {token_type: "LBRACE".to_string(), value: "{".to_string()});
-            lbraces.push(tokens.len() - 1);
+            lbraces.push(Lstore{par: tokens.len() - 1, char: char_num});
         }
 
 
@@ -207,7 +207,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
                 break;
             }
 
-            brace_sets.push(ParPairs{l: lbraces[lbraces.len() - 1], r: (tokens.len() - 1).try_into().unwrap()});
+            brace_sets.push(ParPairs{l: lbraces[lbraces.len() - 1].par, r: (tokens.len() - 1).try_into().unwrap()});
             lbraces.pop();
 
 
@@ -234,7 +234,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
         if char == '[' {
             tokens.push(Token {token_type: "LBRACKET".to_string(), value: "[".to_string()});
-            lbrackets.push(tokens.len() - 1);
+            lbrackets.push(Lstore {par: tokens.len() - 1, char: char_num});
         }
 
 
@@ -247,7 +247,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
                 break;
             }
 
-            bracket_sets.push(ParPairs{l: lbrackets[lbrackets.len() - 1], r: (tokens.len() - 1).try_into().unwrap()});
+            bracket_sets.push(ParPairs{l: lbrackets[lbrackets.len() - 1].par, r: (tokens.len() - 1).try_into().unwrap()});
             lbrackets.pop();
 
 
@@ -315,17 +315,17 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
     if lpars.len() != 0 {
         println!("Error: bro you can't have a left parenthesis without a right one");
-        errors.push(PErr{error:4, char: lpars[0] as i64});    //ERROR
+        errors.push(PErr{error:4, char: lpars[0].char as i64});    //ERROR
     }
 
     if lbraces.len() != 0 {
         println!("Error: bro you can't have a left brace without a right one");
-        errors.push(PErr{error:5, char: lbraces[0] as i64});    //ERROR
+        errors.push(PErr{error:5, char: lbraces[0].char as i64});    //ERROR
     }
     
     if lbrackets.len() != 0 {
         println!("Error: bro you can't have a left bracket without a right one");
-        errors.push(PErr{error:6, char: lbrackets[0] as i64});    //ERROR
+        errors.push(PErr{error:6, char: lbrackets[0].char as i64});    //ERROR
     }
 
 
@@ -351,4 +351,9 @@ pub struct AST {
 pub struct PErr {
     pub error: i8,
     pub char: i64,
+}
+
+struct Lstore {
+    par: usize,
+    char: i64,
 }
