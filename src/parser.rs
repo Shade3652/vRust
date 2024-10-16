@@ -315,17 +315,17 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
     if lpars.len() != 0 {
         println!("Error: bro you can't have a left parenthesis without a right one");
-        errors.push(PErr{error:4, char: text.find("(").unwrap_or(usize::MAX) as i64});    //ERROR
+        errors.push(PErr{error:4, char: lpars[0] as i64});    //ERROR
     }
 
     if lbraces.len() != 0 {
         println!("Error: bro you can't have a left brace without a right one");
-        errors.push(PErr{error:5, char: text.find("{").unwrap_or(usize::MAX) as i64});    //ERROR
+        errors.push(PErr{error:5, char: lbraces[0] as i64});    //ERROR
     }
     
     if lbrackets.len() != 0 {
         println!("Error: bro you can't have a left bracket without a right one");
-        errors.push(PErr{error:6, char: text.find("[").unwrap_or(usize::MAX) as i64});    //ERROR
+        errors.push(PErr{error:6, char: lbrackets[0] as i64});    //ERROR
     }
 
 
