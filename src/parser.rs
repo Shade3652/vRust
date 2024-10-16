@@ -1,6 +1,6 @@
 //use std::collections::HashMap;
 
-pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
+pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
     let mut string: String = String::from("");  //Number vars
     let mut num: String = String::from("");
@@ -18,18 +18,22 @@ pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
     let mut lbrackets: Vec<usize> = Vec::new(); //Bracket vars
     let mut bracket_sets: Vec<ParPairs> = Vec::new();
 
-    let errors: Vec<String> = Vec::new();
+    let mut errors: Vec<PErr> = Vec::new();
 
     //static DOT: LazyLock<String> = LazyLock::new(|| String::from(".")); //OLD CODE FOR OLD DOT
 
-
+    let mut char_num: i64 = 1;
     for char in text.chars() {
 
 
         if "1234567890.".contains(char) {   //Checks to see if the number being parsed has 2 decimal points
+
             if num_point && char == '.' {
-                println!("Error: bro a number can't have two points"); //ERROR
+                println!("Error: bro a number can't have two points");
+                errors.push(PErr{error:0, char: char_num});    //ERROR
+                break;
             } 
+
 
             else {  //Otherwise...
 
@@ -117,20 +121,33 @@ pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
 
 
             if lpars.len() == 0 {
-                println!("Error: bro you can't have a right parenthesis without a left one"); //ERROR
+                println!("Error: bro you can't have a right parenthesis without a left one");
+                errors.push(PErr{error:1, char: char_num});    //ERROR
+                break;
             }
+
             paren_sets.push(ParPairs{l: lpars[lpars.len() - 1], r: (tokens.len() - 1).try_into().unwrap()});
             lpars.pop();
 
-
+            
             //P2: Adding a AST object
             let temp: Vec<Token> = tokens[paren_sets[paren_sets.len() - 1].l + 1.. paren_sets[paren_sets.len() - 1].r].to_vec();
+
                 for _i in &temp {
                     tokens.remove(paren_sets[paren_sets.len() - 1].l + 1);
                 }
 
-                asts.push(AST {children: temp});
-                tokens.insert(paren_sets[paren_sets.len() - 1].l + 1, Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string()});
+                if temp.len() == 0 {
+                    tokens.pop();
+                    tokens.pop();
+                    tokens.push(Token {token_type: "EPARS".to_string(), value: "()".to_string()});
+                }
+
+                else {
+                    asts.push(AST {children: temp});
+                    tokens.insert(paren_sets[paren_sets.len() - 1].l + 1, Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string()});
+                }
+                
             }
 
         if char == '"' {
@@ -185,21 +202,33 @@ pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
 
 
             if lbraces.len() == 0 {
-                println!("Error: bro you can't have a right brace without a left one"); //ERROR
+                println!("Error: bro you can't have a right brace without a left one");
+                errors.push(PErr{error:2, char: char_num});    //ERROR
+                break;
             }
 
             brace_sets.push(ParPairs{l: lbraces[lbraces.len() - 1], r: (tokens.len() - 1).try_into().unwrap()});
             lbraces.pop();
 
 
-             //P2: Adding a AST object
-             let temp: Vec<Token> = tokens[brace_sets[brace_sets.len() - 1].l + 1.. brace_sets[brace_sets.len() - 1].r].to_vec();
-             for _i in &temp {
-                 tokens.remove(brace_sets[brace_sets.len() - 1].l + 1);
-             }
 
-             asts.push(AST {children: temp});
-             tokens.insert(brace_sets[brace_sets.len() - 1].l + 1, Token {token_type: "SCOPE".to_string(), value: (asts.len() - 1).to_string()});
+            //P2: Adding a AST object
+            let temp: Vec<Token> = tokens[brace_sets[brace_sets.len() - 1].l + 1.. brace_sets[brace_sets.len() - 1].r].to_vec();
+            for _i in &temp {
+                tokens.remove(brace_sets[brace_sets.len() - 1].l + 1);
+            }
+
+            if temp.len() == 0 {
+                tokens.pop();
+                tokens.pop();
+                tokens.push(Token {token_type: "EBRACES".to_string(), value: "{}".to_string()});
+            }
+            
+            else {
+                asts.push(AST {children: temp});
+                tokens.insert(brace_sets[brace_sets.len() - 1].l + 1, Token {token_type: "SCOPE".to_string(), value: (asts.len() - 1).to_string()});
+            }
+    
         }
 
 
@@ -213,7 +242,9 @@ pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
             tokens.push(Token {token_type: "RBRACKET".to_string(), value: "]".to_string()});
 
             if lbrackets.len() == 0 {
-                println!("Error: bro you can't have a right bracket without a left one"); //ERROR
+                println!("Error: bro you can't have a right bracket without a left one");
+                errors.push(PErr{error:3, char: char_num});    //ERROR
+                break;
             }
 
             bracket_sets.push(ParPairs{l: lbrackets[lbrackets.len() - 1], r: (tokens.len() - 1).try_into().unwrap()});
@@ -226,10 +257,19 @@ pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
                  tokens.remove(bracket_sets[bracket_sets.len() - 1].l + 1);
              }
 
-             asts.push(AST {children: temp});
-             tokens.insert(bracket_sets[bracket_sets.len() - 1].l + 1, Token {token_type: "LIST".to_string(), value: (asts.len() - 1).to_string()});
+             if temp.len() == 0 {
+                    tokens.pop();
+                    tokens.pop();
+                    tokens.push(Token {token_type: "EBRACKETS".to_string(), value: "[]".to_string()});
+             }
+             
+             
+             else {
+                asts.push(AST {children: temp});
+                tokens.insert(bracket_sets[bracket_sets.len() - 1].l + 1, Token {token_type: "LIST".to_string(), value: (asts.len() - 1).to_string()});
+             }
         }
-
+        char_num += 1;
     }
 
 
@@ -274,19 +314,22 @@ pub fn parse(text: String) -> (Vec<Token>, Vec<AST>, Vec<String>) {
 
 
     if lpars.len() != 0 {
-        println!("Error: bro you can't have a left parenthesis without a right one"); //ERROR
+        println!("Error: bro you can't have a left parenthesis without a right one");
+        errors.push(PErr{error:4, char: text.find("(").unwrap_or(usize::MAX) as i64});    //ERROR
     }
 
     if lbraces.len() != 0 {
-        println!("Error: bro you can't have a left brace without a right one"); //ERROR
+        println!("Error: bro you can't have a left brace without a right one");
+        errors.push(PErr{error:5, char: text.find("{").unwrap_or(usize::MAX) as i64});    //ERROR
     }
     
     if lbrackets.len() != 0 {
-        println!("Error: bro you can't have a left bracket without a right one"); //ERROR
+        println!("Error: bro you can't have a left bracket without a right one");
+        errors.push(PErr{error:6, char: text.find("[").unwrap_or(usize::MAX) as i64});    //ERROR
     }
 
 
-    return (tokens, asts, errors);
+    return (tokens, asts, errors, char_num);
 
 }
 
@@ -303,4 +346,9 @@ struct ParPairs {
 
 pub struct AST {
     pub children: Vec<Token>,
+}
+
+pub struct PErr {
+    pub error: i8,
+    pub char: i64,
 }
