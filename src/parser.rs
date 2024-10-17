@@ -29,7 +29,6 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
         if "1234567890.".contains(char) {   //Checks to see if the number being parsed has 2 decimal points
 
             if num_point && char == '.' {
-                println!("Error: bro a number can't have two points");
                 errors.push(PErr{error:0, char: char_num});    //ERROR
                 break;
             } 
@@ -125,7 +124,6 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
 
             if lpars.len() == 0 {
-                println!("Error: bro you can't have a right parenthesis without a left one");
                 errors.push(PErr{error:1, char: char_num});    //ERROR
                 break;
             }
@@ -206,7 +204,6 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
 
             if lbraces.len() == 0 {
-                println!("Error: bro you can't have a right brace without a left one");
                 errors.push(PErr{error:2, char: char_num});    //ERROR
                 break;
             }
@@ -246,7 +243,6 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
             tokens.push(Token {token_type: "RBRACKET".to_string(), value: "]".to_string()});
 
             if lbrackets.len() == 0 {
-                println!("Error: bro you can't have a right bracket without a left one");
                 errors.push(PErr{error:3, char: char_num});    //ERROR
                 break;
             }
@@ -318,17 +314,14 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
 
     if lpars.len() != 0 {
-        println!("Error: bro you can't have a left parenthesis without a right one");
         errors.push(PErr{error:4, char: lpars[0].char as i64});    //ERROR
     }
 
     if lbraces.len() != 0 {
-        println!("Error: bro you can't have a left brace without a right one");
         errors.push(PErr{error:5, char: lbraces[0].char as i64});    //ERROR
     }
     
     if lbrackets.len() != 0 {
-        println!("Error: bro you can't have a left bracket without a right one");
         errors.push(PErr{error:6, char: lbrackets[0].char as i64});    //ERROR
     }
 
