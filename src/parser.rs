@@ -5,6 +5,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
     let mut string: String = String::from("");  //Number vars
     let mut num: String = String::from("");
     let mut num_point: bool  = false;
+    let mut d_num_point: bool = false;
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
@@ -29,8 +30,10 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
         if ("1234567890".contains(char) && string.len() == 0) || char == '.'{   //Checks to see if the number being parsed has 2 decimal points
 
             if num_point && char == '.' {
-                errors.push(PErr{error:0, char: char_num});    //ERROR
-                break;
+
+                d_num_point = true;
+                //errors.push(PErr{error:0, char: char_num});    //ERROR
+                //break;
             } 
 
 
@@ -54,10 +57,16 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
         else {
             if "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm".contains(char) {
                 string = string + (num.clone()).as_str();
+                d_num_point = false;
+                num_point = false;
                 num = String::from("");
             }
 
             if !(num == "") {
+                if d_num_point {
+                    errors.push(PErr{error:0, char: char_num});    //ERROR
+                    break;
+                }
                 if num_point {
                     tokens.push(Token {token_type: "FLOAT".to_string(), value: num.clone()});
                 }
