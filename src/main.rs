@@ -2,6 +2,7 @@ mod parser;
 use std::fs;
 use serde_json::Value;
 use std::env;
+use colored::Colorize;
 
 
 fn main() {
@@ -37,7 +38,7 @@ fn main() {
 
     else {
         for i in &errors {
-            let err_message = &parsing_errors[i.error.to_string()]["message"].as_str().unwrap().to_ascii_uppercase();
+            let err_message = &parsing_errors[i.error.to_string()]["message"].as_str().unwrap().to_ascii_uppercase().red().bold();
             println!("Error: {} at character {}", err_message, i.char);
         }
     }
