@@ -50,7 +50,12 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
             num.push(char);
         
         }
+
         else {
+            if "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm".contains(char) {
+                string = string + (num.clone()).as_str();
+                num = String::from("");
+            }
 
             if !(num == "") {
                 if num_point {
