@@ -1,5 +1,7 @@
 mod parser;
 use std::fs;
+use serde_json::{Result, Value};
+use std::env;
 
 
 fn main() {
@@ -9,6 +11,10 @@ fn main() {
     let asts: Vec<parser::AST> = parsed.1;
     let errors: Vec<parser::PErr> = parsed.2;
     let mut count: i32 = 0;
+
+    let current_path = env::current_dir().unwrap().into_os_string().into_string().unwrap();
+    let contents = fs::read_to_string((current_path.to_string() + "/src/Errors/Parsing.json").to_owned()).expect("Couldn't find or load that file.");
+    let v: Value = serde_json::from_str(&contents).expect("Couldn't parse that file.");
 
 
     if errors.len() == 0 {
@@ -33,6 +39,7 @@ fn main() {
         for i in &errors {
             let chars: Vec<char> = text.chars().collect();
             println!("Error: {} at character {} sus: {}", i.error, i.char, chars[(i.char - 1) as usize]);
+            println!("{}", v["1"]["message"]);
         }
     }
 }

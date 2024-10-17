@@ -109,6 +109,10 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
             }
         }
 
+        if char == '\\' {
+            tokens.push(Token {token_type: "BSLASH".to_string(), value: "\\".to_string()});
+        }
+
         if char == '(' {
             tokens.push(Token {token_type: "LPAR".to_string(), value: "(".to_string()});
             lpars.push(Lstore{par: tokens.len() - 1, char: char_num});
