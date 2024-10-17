@@ -6,8 +6,8 @@ use colored::Colorize;
 
 
 fn main() {
-    let text: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420gg");
-    let parsed: (Vec<parser::Token>, Vec<parser::AST>, Vec<parser::PErr>, i64)= parser::parse(&text);
+    let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69. 69.420.gg");
+    let parsed: (Vec<parser::Token>, Vec<parser::AST>, Vec<parser::PErr>, i64)= parser::parse(&line);
     let tokens: Vec<parser::Token> = parsed.0;
     let asts: Vec<parser::AST> = parsed.1;
     let errors: Vec<parser::PErr> = parsed.2;
@@ -27,9 +27,13 @@ fn main() {
 
 
     for i in &asts {
+
         println!("______________");
+
         for j in &i.children {
+            
             println!("Token: {} | Value: {}", j.token_type, j.value);
+            
         }
     }
 
@@ -38,8 +42,33 @@ fn main() {
 
     else {
         for i in &errors {
+
             let err_message = &parsing_errors[i.error.to_string()]["message"].as_str().unwrap().to_ascii_uppercase().red().bold();
+
+
+            println!("");
             println!("Error: {} at character {}", err_message, i.char);
+            println!("{line}");
+
+            for _i in 0..i.char {
+                print!(" ");
+            }
+            
+            let print: colored::ColoredString = "^\n".to_string().bold().yellow(); //IDK why I have to do this but it fixes a on_white() bug
+            let print = print;
+            print!("{}", print);
+
+            for _i in 0..i.char {
+                print!(" ");
+            }
+
+            print!("{}", "here\n".to_string().bold().yellow());
+
+
+            let print: colored::ColoredString = parsing_errors[i.error.to_string()]["suggestion"].as_str().unwrap().bold().green();
+            let print = print;
+
+            println!("{}", print);
         }
     }
 }

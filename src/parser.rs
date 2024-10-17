@@ -6,6 +6,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
     let mut num: String = String::from("");
     let mut num_point: bool  = false;
     let mut d_num_point: bool = false;
+    let mut s_point_char: i64 = 0;
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
@@ -32,6 +33,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
             if num_point && char == '.' {
 
                 d_num_point = true;
+                s_point_char = char_num;
                 //errors.push(PErr{error:0, char: char_num});    //ERROR
                 //break;
             } 
@@ -64,7 +66,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
 
             if !(num == "") {
                 if d_num_point {
-                    errors.push(PErr{error:0, char: char_num});    //ERROR
+                    errors.push(PErr{error:0, char: s_point_char});    //ERROR
                     break;
                 }
                 if num_point {
