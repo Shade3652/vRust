@@ -26,7 +26,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
     for char in text.chars() {
 
 
-        if "1234567890.".contains(char) {   //Checks to see if the number being parsed has 2 decimal points
+        if ("1234567890".contains(char) && string.len() == 0) || char == '.'{   //Checks to see if the number being parsed has 2 decimal points
 
             if num_point && char == '.' {
                 errors.push(PErr{error:0, char: char_num});    //ERROR
@@ -67,7 +67,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
         }
 
 
-        if "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(char) {
+        if "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(char) || ("1234567890".contains(char) && string.len() != 0) {
             string.push(char);
         }
 
