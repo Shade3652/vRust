@@ -32,5 +32,20 @@
     "6": {
         "message": "Right bracket missing",
         "suggestion": "Consider adding a right bracket to the coresponding left bracket"
+    },
+
+    "7": {
+        "message": "More then 1 character in a ''",
+        "suggestion": "Consider changing the single quotes to double quotes"
+    },
+
+    "8": {
+        "message": "No closing '",
+        "suggestion": "Consider adding a ' to match the end of the character"
+    },
+
+    "9": {
+        "message": "No closing \"",
+        "suggestion": "Consider adding a \" to match the end of the stirng"
     }
 }

@@ -7,7 +7,9 @@ use colored::Colorize;
 
 fn main() {
     let vars: Vec<parser::Token> = Vec::new();
-    let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420.gg");
+    let current_path = env::current_dir().unwrap().into_os_string().into_string().unwrap();
+    let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420.gg sussy\\\" \" fellas in paris // 3.14\"");
+    //let line: String = fs::read_to_string(current_path.to_string() + "/src/testing.tde").expect("Couldn't find or load that file.");
     let parsed: (Vec<parser::Token>, Vec<parser::AST>, Vec<parser::PErr>, Vec<parser::Token>, i64)= parser::parse(&line, vars);
     let tokens: Vec<parser::Token> = parsed.0;
     let asts: Vec<parser::AST> = parsed.1;
@@ -16,7 +18,7 @@ fn main() {
     let mut count: i32 = 0;
 
 
-    let current_path = env::current_dir().unwrap().into_os_string().into_string().unwrap();
+
     let contents = fs::read_to_string((current_path.to_string() + "/src/Errors/Parsing.json").to_owned()).expect("Couldn't find or load that file.");
     let parsing_errors: Value = serde_json::from_str(&contents).expect("Couldn't parse that file.");
 
@@ -39,9 +41,6 @@ fn main() {
                 
             }
         }
-        
-        let file: String = fs::read_to_string(current_path.to_string() + "/src/testing.tde").expect("Couldn't find or load that file.");
-        println!("{}", file);
 
     }
 
