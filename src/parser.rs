@@ -1,12 +1,14 @@
 //use std::collections::HashMap;
 
-pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
+
+pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec<PErr>, Vec<Token>, i64) {
 
     let mut string: String = String::from("");  //Number vars
     let mut num: String = String::from("");
     let mut num_point: bool  = false;
     let mut d_num_point: bool = false;
     let mut s_point_char: i64 = 0;
+    let keywords: String = "false true if for in let def static".to_string();
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
@@ -342,7 +344,7 @@ pub fn parse(text: &String) -> (Vec<Token>, Vec<AST>, Vec<PErr>, i64) {
     }
 
 
-    return (tokens, asts, errors, char_num);
+    return (tokens, asts, errors, variables, char_num);
 
 }
 
