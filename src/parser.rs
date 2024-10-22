@@ -89,12 +89,12 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
         }
 
 
-        if ("QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm".contains(char) || ("1234567890".contains(char) && string.len() != 0)) && !dquote {
+        if ("QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm".contains(char) || ("1234567890".contains(char) && string.len() != 0)) && !dquote && !squote {
             string.push(char);
         }
 
         else {
-            if !(string == "") && !dquote{
+            if !(string == "") && !dquote && !squote {
 
                 if string.len() == 1 {
                     tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
@@ -134,14 +134,14 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
             tokens.push(Token {token_type: "BSLASH".to_string(), value: "\\".to_string()});
         }
 
-        if char == '(' {
+        if char == '(' && !dquote && !squote {
             tokens.push(Token {token_type: "LPAR".to_string(), value: "(".to_string()});
             lpars.push(Lstore{par: tokens.len() - 1, char: char_num});
 
         }
 
 
-        if char == ')' {
+        if char == ')' && !dquote && !squote {
             tokens.push(Token {token_type: "RPAR".to_string(), value: ")".to_string()});
 
 
@@ -173,10 +173,6 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
                 }
                 
             }
-
-        if char == '\'' {
-            tokens.push(Token {token_type: "SQUOTE".to_string(), value: '\''.to_string()});
-        }
 
         if char == ':' {
             tokens.push(Token {token_type: "COLON".to_string(), value: ":".to_string()});
@@ -232,13 +228,13 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
             }
         }
 
-        if char == '{' {
+        if char == '{' && !dquote && !squote {
             tokens.push(Token {token_type: "LBRACE".to_string(), value: "{".to_string()});
             lbraces.push(Lstore{par: tokens.len() - 1, char: char_num});
         }
 
 
-        if char == '}' {
+        if char == '}' && !dquote && !squote {
             tokens.push(Token {token_type: "RBRACE".to_string(), value: "}".to_string()});
 
 
@@ -272,13 +268,13 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
         }
 
 
-        if char == '[' {
+        if char == '[' && !dquote && !squote {
             tokens.push(Token {token_type: "LBRACKET".to_string(), value: "[".to_string()});
             lbrackets.push(Lstore {par: tokens.len() - 1, char: char_num});
         }
 
 
-        if char == ']' {
+        if char == ']' && !dquote && !squote {
             tokens.push(Token {token_type: "RBRACKET".to_string(), value: "]".to_string()});
 
             if lbrackets.len() == 0 {
@@ -324,7 +320,12 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
                     tokens.pop(); tokens.pop();
 
                     string.push(char);
-                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
+
+                    if (string.clone().get(1..(string.len() - 1)).unwrap().to_string()).len() == 1 {
+                        errors.push(PErr{error:8, char: char_num - 1});    //ERROR
+                    }
+
+                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone().get(1..(string.len() - 1)).unwrap().to_string()});
                     string = String::from("");
                     dquote = false;
                 }
@@ -348,14 +349,14 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
                 if squote {
 
                     if string.len() > 2 {
-                        errors.push(PErr{error:7, char: char_num});    //ERROR
+                       errors.push(PErr{error:7, char: char_num - 1});    //ERROR
                         break;
                     }
 
                     tokens.pop(); tokens.pop();
                     
                     string.push(char);
-                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
+                    tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone().chars().nth(1).unwrap().to_string()});
                     string = String::from("");
                     squote = false;
                 }
@@ -368,12 +369,22 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
 
         if dquote {
 
-            if tokens[tokens.len() - 1].token_type != "DQUOTE" {
+            if tokens[tokens.len() - 1].token_type != "DQUOTE" && !("()[]{}".contains(&tokens[tokens.len() - 1].token_type)) {
                 tokens.pop();
             }
 
             string.push(char);
         }
+
+        if squote {
+
+            if tokens[tokens.len() - 1].token_type != "SQUOTE" && !("()[]{}".contains(&tokens[tokens.len() - 1].token_type)) {
+                tokens.pop();
+            }
+
+            string.push(char);
+        }
+
 
         char_num += 1;
     }
@@ -408,6 +419,26 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
         }
 
         let index = reversed_string.char_indices().position(|(_, c)| c == '"');
+
+        if let Some(i) = index {
+            errors.push(PErr{error:10, char: (text.len() - 1 - i) as i64});    //ERROR
+        } 
+        
+        else {
+            errors.push(PErr{error:10, char: 1});    //ERROR
+        }
+    }
+
+
+    if squote {
+
+        let mut reversed_string = String::new(); // Create a new string to store the reversed string
+
+        for c in text.chars().rev() {
+            reversed_string.push(c); // Append each character to the reversed string
+        }
+
+        let index = reversed_string.char_indices().position(|(_, c)| c == '\'');
 
         if let Some(i) = index {
             errors.push(PErr{error:9, char: (text.len() - 1 - i) as i64});    //ERROR

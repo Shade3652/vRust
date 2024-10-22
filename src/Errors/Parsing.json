@@ -40,11 +40,16 @@
     },
 
     "8": {
+        "message": "Only 1 character in a \"\"",
+        "suggestion": "Consider changing the double quotes to single quotes"
+    },
+
+    "9": {
         "message": "No closing '",
         "suggestion": "Consider adding a ' to match the end of the character"
     },
 
-    "9": {
+    "10": {
         "message": "No closing \"",
         "suggestion": "Consider adding a \" to match the end of the stirng"
     }
