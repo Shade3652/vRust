@@ -12,7 +12,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
     let mut dquote: bool = false;
     let mut squote: bool = false;
 
-    let keywords: String = "false true if for in let def static".to_string();
+    let keywords: String = "println".to_string();
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
@@ -96,13 +96,20 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
         else {
             if !(string == "") && !dquote && !squote {
 
-                if string.len() == 1 {
-                    tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
+            if keywords.contains(&string) {
+                tokens.push(Token {token_type: "KEYWORD".to_string(), value: string.clone()});
+            }
+
+            else {
+
+                    if string.len() == 1 {
+                        tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
+                    }
+                    else {
+                        tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
+                    }
+                    string = String::from("");
                 }
-                else {
-                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
-                }
-                string = String::from("");
             }
         }
 
