@@ -313,7 +313,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
 
         }
 
-        if char == '"' {
+        if char == '"' && !squote {
 
             if tokens[tokens.len() - 1].token_type == "BSLASH" {
                 tokens.pop();
@@ -343,7 +343,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
             }
         }
 
-        if char == '\'' {
+        if char == '\'' && !dquote{
 
             if tokens[tokens.len() - 1].token_type == "BSLASH" {
                 tokens.pop();

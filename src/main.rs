@@ -8,7 +8,7 @@ use colored::Colorize;
 fn main() {
     let vars: Vec<parser::Token> = Vec::new();
     let current_path = env::current_dir().unwrap().into_os_string().into_string().unwrap();
-    //let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420.gg sussy\\\" \" fellas in paris // 3.14\" 's' \")\"");
+    //let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420.gg sussy\\\" \" fellas in paris // 3.14\" 's' \"'k\" '\"'");
     let line: String = fs::read_to_string(current_path.to_string() + "/src/testing.tde").expect("Couldn't find or load that file.");
     let parsed: (Vec<parser::Token>, Vec<parser::AST>, Vec<parser::PErr>, Vec<parser::Token>, i64)= parser::parse(&line, vars);
     let tokens: Vec<parser::Token> = parsed.0;
