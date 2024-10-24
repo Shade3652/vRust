@@ -3,6 +3,8 @@ use std::fs;
 use serde_json::Value;
 use std::env;
 use colored::Colorize;
+use std::path::Path;
+
 
 
 fn main() {
@@ -60,9 +62,7 @@ fn main() {
                 print!(" ");
             }
             
-            let print: colored::ColoredString = "^\n".to_string().bold().yellow(); //IDK why I have to do this but it fixes a on_white() bug
-            let print = print;
-            print!("{}", print);
+            print!("{}", "^\n".to_string().bold().yellow()); //IDK why I have to do this but it fixes a on_white() bug
 
             for _i in 0..i.char {
                 print!(" ");
@@ -71,10 +71,7 @@ fn main() {
             print!("{}", "here\n".to_string().bold().yellow());
 
 
-            let print: colored::ColoredString = parsing_errors[i.error.to_string()]["suggestion"].as_str().unwrap().bold().green();
-            let print = print;
-
-            println!("{}", print);
+            println!("{}", parsing_errors[i.error.to_string()]["suggestion"].as_str().unwrap().bold().green());
         }
     }
 }

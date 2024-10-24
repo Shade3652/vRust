@@ -245,7 +245,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
             tokens.push(Token {token_type: "RBRACE".to_string(), value: "}".to_string()});
 
 
-            if lbraces.len() == 0 {
+            if lbraces.len() == 0 {     //Checks to see if there are any left braces to match the right brace
                 errors.push(PErr{error:2, char: char_num});    //ERROR
                 break;
             }
@@ -313,9 +313,9 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
 
         }
 
-        if char == '"' && !squote {
+        if char == '"' && !squote {     //Makes sure that the character is not a part of a string
 
-            if tokens[tokens.len() - 1].token_type == "BSLASH" {
+            if tokens[tokens.len() - 1].token_type == "BSLASH" {     //Makes sure that if an escaoed character is used, it is added to the current string instead of being treated as a quote
                 tokens.pop();
                 tokens.push(Token {token_type: "CHAR".to_string(), value: '"'.to_string()});
             }
@@ -323,12 +323,12 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
             else {
                 tokens.push(Token {token_type: "DQUOTE".to_string(), value: '"'.to_string()});
 
-                if dquote {
-                    tokens.pop(); tokens.pop();
+                if dquote {     //Preps the string to be added to the tokens
+                    tokens.pop(); tokens.pop();     //Removes the quotes from the tokens list bc they are not needed
 
                     string.push(char);
 
-                    if (string.clone().get(1..(string.len() - 1)).unwrap().to_string()).len() == 1 {
+                    if (string.clone().get(1..(string.len() - 1)).unwrap().to_string()).len() == 1 {    //Check to see if the string is a char
                         errors.push(PErr{error:8, char: char_num - 1});    //ERROR
                     }
 
@@ -338,14 +338,14 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
                 }
 
                 else {
-                    dquote = true;
+                    dquote = true;       //Starts the adding process
                 }
             }
         }
 
-        if char == '\'' && !dquote{
+        if char == '\'' && !dquote{     //Makes sure that the character is not a part of a string
 
-            if tokens[tokens.len() - 1].token_type == "BSLASH" {
+            if tokens[tokens.len() - 1].token_type == "BSLASH" {    //Makes sure that if an escaoed character is used, it is added to the current char instead of being treated as a quote
                 tokens.pop();
                 tokens.push(Token {token_type: "CHAR".to_string(), value: '\''.to_string()});
             }
@@ -353,9 +353,9 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
             else {
                 tokens.push(Token {token_type: "SQUOTE".to_string(), value: '\''.to_string()});
 
-                if squote {
+                if squote {     //Preps the string to be added to the tokens
 
-                    if string.len() > 2 {
+                    if string.len() > 2 {       //Check to see if the char is a string
                        errors.push(PErr{error:7, char: char_num - 1});    //ERROR
                         break;
                     }
@@ -369,24 +369,24 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
                 }
 
                 else {
-                    squote = true;
+                    squote = true;      //Starts the adding process
                 }
             }
         }
 
-        if dquote {
+        if dquote {     //"" Work to add it to the current string
 
             if tokens[tokens.len() - 1].token_type != "DQUOTE" && !("()[]{}".contains(&tokens[tokens.len() - 1].token_type)) {
-                tokens.pop();
+                tokens.pop();    //WAY easier than then stoping anything from adding to the tokens list
             }
 
             string.push(char);
         }
 
-        if squote {
+        if squote {     //Same but with ''
 
             if tokens[tokens.len() - 1].token_type != "SQUOTE" && !("()[]{}".contains(&tokens[tokens.len() - 1].token_type)) {
-                tokens.pop();
+                tokens.pop();   //WAY easier than then stoping anything from adding to the tokens list
             }
 
             string.push(char);
@@ -399,7 +399,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
 
 
 
-    if !(num == "") {
+    if !(num == "") {   //Last checks in case the last character was a number (It't wont add otherwise because it would need another cycle)
         if num_point {
             tokens.push(Token {token_type: "FLOAT".to_string(), value: num.clone()});
         }
@@ -408,7 +408,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
         }
     }
 
-    if !(string == "") {
+    if !(string == "") {    //Same but with letters
         if string.len() == 1 {
             tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
         }
@@ -499,11 +499,6 @@ pub struct Token {
     pub value: String,
 }
 
-struct ParPairs {
-    l: usize,
-    r: usize,
-}
-
 pub struct AST {
     pub children: Vec<Token>,
 }
@@ -516,4 +511,9 @@ pub struct PErr {
 struct Lstore {
     par: usize,
     char: i64,
+}
+
+struct ParPairs {
+    l: usize,
+    r: usize,
 }
