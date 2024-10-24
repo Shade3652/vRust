@@ -74,6 +74,7 @@ fn main() {
 
 
             println!("{}", parsing_errors[i.error.to_string()]["suggestion"].as_str().unwrap().bold().green());
+            return;
         }
     }
 
