@@ -106,7 +106,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
                         tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
                     }
                     else {
-                        tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
+                        tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone()});
                     }
                     string = String::from("");
                 }
@@ -332,7 +332,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
                         errors.push(PErr{error:8, char: char_num - 1});    //ERROR
                     }
 
-                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone().get(1..(string.len() - 1)).unwrap().to_string()});
+                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
                     string = String::from("");
                     dquote = false;
                 }
@@ -413,7 +413,7 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
             tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
         }
         else {
-            tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
+            tokens.push(Token {token_type: "CHARSTRs".to_string(), value: string.clone()});
         }
     }
 

@@ -1,5 +1,5 @@
-use src::parser;
+use crate::parser;
 
-fn main() {
+pub fn println() {
     println!("Hello, world!");
 }

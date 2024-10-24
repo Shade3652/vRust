@@ -5,6 +5,8 @@ use std::env;
 use colored::Colorize;
 use std::path::Path;
 
+#[path = "lang/stdio/out.rs"]
+mod out;
 
 
 fn main() {
@@ -74,4 +76,6 @@ fn main() {
             println!("{}", parsing_errors[i.error.to_string()]["suggestion"].as_str().unwrap().bold().green());
         }
     }
+
+    out::println();
 }
