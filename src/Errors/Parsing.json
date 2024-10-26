@@ -52,5 +52,10 @@
     "10": {
         "message": "No closing \"",
         "suggestion": "Consider adding a \" to match the end of the stirng"
+    },
+
+    "11": {
+        "message": "No closing ;",
+        "suggestion": "Consider adding a ; the end of the file"
     }
 }

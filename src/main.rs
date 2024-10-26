@@ -4,8 +4,10 @@ use serde_json::Value;
 use std::env;
 use colored::Colorize;
 
-#[path = "lang/stdio/out.rs"]
-mod out;
+#[path = "lang/function_find.rs"]
+mod function_find;
+
+
 
 
 fn main() {
@@ -13,10 +15,14 @@ fn main() {
     //let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420.gg sussy\\\" \" fellas in paris // 3.14\" 's' \"'k\" '\"';");
     let line: String = fs::read_to_string(current_path.to_string() + "/src/testing.tde").expect("Couldn't find or load that file.");
     let parsed: (Vec<Vec<parser::Token>>, Vec<parser::AST>, Vec<parser::PErr>, Vec<Vec<i64>>)= parser::parse(&line);
-    let tokens: Vec<Vec<parser::Token>> = parsed.0;
+    let variables: Vec<VAR> = Vec::new();
+    let variable_names: Vec<String> = Vec::new();
+
+    let lines: Vec<Vec<parser::Token>> = parsed.0;
     let asts: Vec<parser::AST> = parsed.1;
     let errors: Vec<parser::PErr> = parsed.2;
-    let lines: Vec<Vec<i64>> = parsed.3;
+    let line_asts: Vec<Vec<i64>> = parsed.3;
+
     let mut count: i32 = 0;
 
 
@@ -27,7 +33,7 @@ fn main() {
 
     if errors.len() == 0 {
 
-        for i in &tokens {
+        for i in &lines { 
             for j in i {
                 println!("Token: {} | Value: {} ({})", j.token_type, j.value, count);
                 count += 1;
@@ -77,15 +83,19 @@ fn main() {
         }
     }
 
-    out::println();
-
-
-
 
     //THE ACTUAL STUFF
     let mut skip: i32 = 0;
 
-    for j in tokens {
+    let mut line_num: i64 = 0;
+
+    for mut j in lines {
+
+        for k in &mut j {
+            if k.token_type == "CHARSTR" && variable_names.contains(&k.value) {
+                k.token_type = "VAR".to_string();
+            }
+        }
 
 
         for i in j {
@@ -95,6 +105,23 @@ fn main() {
                 continue;
             }
 
+            if line_asts[line_num as usize].len() > 0 {
+                //AST solver
+            }
+
+            if i.token_type == "FUNC" {
+                function_find::find(i.value, asts[line_num as usize].clone(), asts.clone(), variables.clone());
+            }
         }
+
+        line_num += 1;
     }
+}
+
+
+#[derive(Clone)]
+struct VAR {
+    name: String,
+    var_type: String,
+    value: String,
 }

@@ -32,6 +32,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
     //static DOT: LazyLock<String> = LazyLock::new(|| String::from(".")); //OLD CODE FOR OLD DOT
 
     let mut char_num: i64 = 0;
+
     for char in text.chars() {
 
 
@@ -41,8 +42,6 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
                 d_num_point = true;
                 s_point_char = char_num;
-                //errors.push(PErr{error:0, char: char_num});    //ERROR
-                //break;
             } 
 
 
@@ -50,7 +49,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
                 if char == '.' {    //Corrects number types
                     if num == "" {
-                        tokens.push(Token {token_type: "DOT".to_string(), value: ".".to_string()});
+                        tokens.push(Token {token_type: "DOT".to_string(), value: ".".to_string(), start: char_num.clone()});
                     }
 
                 else {
@@ -77,11 +76,11 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                     break;
                 }
                 if num_point {
-                    tokens.push(Token {token_type: "FLOAT".to_string(), value: num.clone()});
+                    tokens.push(Token {token_type: "FLOAT".to_string(), value: num.clone(), start: (char_num - string.len() as i64)});
                 }
 
                 else {
-                    tokens.push(Token {token_type: "INT".to_string(), value: num.clone()});
+                    tokens.push(Token {token_type: "INT".to_string(), value: num.clone(), start: (char_num - string.len() as i64)});
                 }
                 num_point = false;
 
@@ -98,16 +97,19 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
             if !(string == "") && !dquote && !squote {
 
             if keywords.contains(&string) {
-                tokens.push(Token {token_type: "KEYWORD".to_string(), value: string.clone()});
+
+                
+
+                tokens.push(Token {token_type: "KEYWORD".to_string(), value: string.clone(), start: (char_num - string.len() as i64)}); //Puts the keyword in the tokens list
             }
 
             else {
 
                     if string.len() == 1 {
-                        tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
+                        tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone(),start: (char_num - string.len() as i64)});
                     }
                     else {
-                        tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone()});
+                        tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone(),start: (char_num - string.len() as i64)});
                     }
                     string = String::from("");
                 }
@@ -117,40 +119,40 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
 
         if char == '+' {
-            tokens.push(Token {token_type: "PLUS".to_string(), value: "+".to_string()});
+            tokens.push(Token {token_type: "PLUS".to_string(), value: "+".to_string(), start: char_num.clone()});
         }
 
         if char == '-' {
-            tokens.push(Token {token_type: "MINUS".to_string(), value: "-".to_string()});
+            tokens.push(Token {token_type: "MINUS".to_string(), value: "-".to_string(), start: char_num.clone()});
         }
 
         if char == '*' {
-            tokens.push(Token {token_type: "MUL".to_string(), value: "*".to_string()});
+            tokens.push(Token {token_type: "MUL".to_string(), value: "*".to_string(), start: char_num.clone()});
         }
 
         if char == '/' {
             if tokens[tokens.len() - 1].token_type == "DIV" {
                 tokens.pop();
-                tokens.push(Token {token_type: "DODIV".to_string(), value: "//".to_string()});
+                tokens.push(Token {token_type: "DODIV".to_string(), value: "//".to_string(), start: char_num.clone() - 1});
             }
             else {
-                tokens.push(Token {token_type: "DIV".to_string(), value: "/".to_string()});
+                tokens.push(Token {token_type: "DIV".to_string(), value: "/".to_string(), start: char_num.clone()});
             }
         }
 
         if char == '\\' {
-            tokens.push(Token {token_type: "BSLASH".to_string(), value: "\\".to_string()});
+            tokens.push(Token {token_type: "BSLASH".to_string(), value: "\\".to_string(), start: char_num.clone()});
         }
 
         if char == '(' && !dquote && !squote {
-            tokens.push(Token {token_type: "LPAR".to_string(), value: "(".to_string()});
+            tokens.push(Token {token_type: "LPAR".to_string(), value: "(".to_string(), start: char_num.clone()});
             lpars.push(Lstore{par: tokens.len() - 1, char: char_num});
 
         }
 
 
         if char == ')' && !dquote && !squote {
-            tokens.push(Token {token_type: "RPAR".to_string(), value: ")".to_string()});
+            tokens.push(Token {token_type: "RPAR".to_string(), value: ")".to_string(), start: char_num.clone()});
 
 
             if lpars.len() == 0 {
@@ -175,101 +177,108 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                             
                         let temp_value = tokens[tokens.len() - 1].value.clone();
                         tokens.pop();
-    
-                        tokens.push(Token {token_type: "FUNC".to_string(), value: temp_value});
-                        tokens.push(Token {token_type: "ARGS".to_string(), value: "0".to_string()});
+                        
+                        let temp_value_len: usize = temp_value.len();
+                        tokens.push(Token {token_type: "FUNC".to_string(), value: temp_value, start: char_num.clone() - 1 - temp_value_len as i64});
+                        tokens.push(Token {token_type: "ARGS".to_string(), value: "0".to_string(), start: char_num.clone() - 1});
                     }
 
                     else {
                         tokens.pop();
                         tokens.pop();
-                        tokens.push(Token {token_type: "EPARS".to_string(), value: "()".to_string()});
+                        tokens.push(Token {token_type: "EPARS".to_string(), value: "()".to_string(), start: char_num.clone() - 1});
                     }
                 }
 
                 else {
+                    let temp_len: usize = temp.len();
                     asts.push(AST {children: temp});
                     tokens.pop(); tokens.pop();
 
                     if tokens[tokens.len() - 1].token_type == "CHARSTR" {
 
-                        let temp_value = tokens[tokens.len() - 1].value.clone();
+                        let temp_value: String = tokens[tokens.len() - 1].value.clone();
+                        let temp_value_len: usize = temp_value.len();
                         tokens.pop();
 
-                        tokens.push(Token {token_type: "FUNC".to_string(), value: temp_value});
-                        tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string()});
+                        tokens.push(Token {token_type: "FUNC".to_string(), value: temp_value, start: char_num.clone() - temp_len as i64 - temp_value_len as i64});
+                        tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
 
                     }
 
                     else {
-                        tokens.push(Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string()});
+                        tokens.push(Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
                     }
                 }
                 
             }
 
         if char == ':' {
-            tokens.push(Token {token_type: "COLON".to_string(), value: ":".to_string()});
+            tokens.push(Token {token_type: "COLON".to_string(), value: ":".to_string(), start: char_num.clone()});
         }
 
         if char == ';' {
-            tokens.push(Token {token_type: "SEMICOLON".to_string(), value: ";".to_string()});
+            tokens.push(Token {token_type: "SEMICOLON".to_string(), value: ";".to_string(), start: char_num.clone()});
         }
 
         if char == '&' {
             if tokens[tokens.len() - 1].token_type == "APERSAND" {
                 tokens.pop();
-                tokens.push(Token {token_type: "AND".to_string(), value: "&&".to_string()});
+                tokens.push(Token {token_type: "AND".to_string(), value: "&&".to_string(), start: char_num.clone() - 1});
             }
             else {
-                tokens.push(Token {token_type: "APERSAND".to_string(), value: "&".to_string()});
+                tokens.push(Token {token_type: "APERSAND".to_string(), value: "&".to_string(), start: char_num.clone()});
             }
         }
 
         if char == '|' {
             if tokens[tokens.len() - 1].token_type == "LINE" {
                 tokens.pop();
-                tokens.push(Token {token_type: "OR".to_string(), value: "||".to_string()});
+                tokens.push(Token {token_type: "OR".to_string(), value: "||".to_string(), start: char_num.clone() - 1});
             }
             else {
-                tokens.push(Token {token_type: "LINE".to_string(), value: "|".to_string()});
+                tokens.push(Token {token_type: "LINE".to_string(), value: "|".to_string(), start: char_num.clone() - 1});
             }
         }
 
         if char == '!' {
-            tokens.push(Token {token_type: "NOT".to_string(), value: "!".to_string()});
+            tokens.push(Token {token_type: "NOT".to_string(), value: "!".to_string(), start: char_num.clone()});
         }
 
         if char == '>' {
-            tokens.push(Token {token_type: "GREATER".to_string(), value: ">".to_string()});
+            tokens.push(Token {token_type: "GREATER".to_string(), value: ">".to_string(), start: char_num.clone()});
         }
 
         if char == '<' {
-            tokens.push(Token {token_type: "LESS".to_string(), value: "<".to_string()});
+            tokens.push(Token {token_type: "LESS".to_string(), value: "<".to_string(), start: char_num.clone()});
         }
 
         if char == ',' {
-            tokens.push(Token {token_type: "COMMA".to_string(), value: ",".to_string()});
+            tokens.push(Token {token_type: "COMMA".to_string(), value: ",".to_string(), start: char_num.clone()});
         }
 
         if char == '=' {
             if tokens[tokens.len() - 1].token_type == "EQUAL" {
                 tokens.pop();
-                tokens.push(Token {token_type: "DEQUAL".to_string(), value: "==".to_string()});
+                tokens.push(Token {token_type: "DEQUAL".to_string(), value: "==".to_string(), start: char_num.clone() - 1});
+            }
+            if tokens[tokens.len() - 1].token_type == "NOT" {
+                tokens.pop();
+                tokens.push(Token {token_type: "NEQUAL".to_string(), value: "!=".to_string(), start: char_num.clone() - 1});
             }
             else {
-                tokens.push(Token {token_type: "EQUAL".to_string(), value: "=".to_string()});
+                tokens.push(Token {token_type: "EQUAL".to_string(), value: "=".to_string(), start: char_num.clone()});
             }
         }
 
         if char == '{' && !dquote && !squote {
-            tokens.push(Token {token_type: "LBRACE".to_string(), value: "{".to_string()});
+            tokens.push(Token {token_type: "LBRACE".to_string(), value: "{".to_string(), start: char_num.clone()});
             lbraces.push(Lstore{par: tokens.len() - 1, char: char_num});
         }
 
 
         if char == '}' && !dquote && !squote {
-            tokens.push(Token {token_type: "RBRACE".to_string(), value: "}".to_string()});
+            tokens.push(Token {token_type: "RBRACE".to_string(), value: "}".to_string(), start: char_num.clone()});
 
 
             if lbraces.len() == 0 {     //Checks to see if there are any left braces to match the right brace
@@ -291,26 +300,27 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
             if temp.len() == 0 {
                 tokens.pop();
                 tokens.pop();
-                tokens.push(Token {token_type: "EBRACES".to_string(), value: "{}".to_string()});
+                tokens.push(Token {token_type: "EBRACES".to_string(), value: "{}".to_string(), start: char_num.clone() - 1});
             }
             
             else {
+                let temp_len: usize = temp.len();
                 tokens.pop(); tokens.pop();
                 asts.push(AST {children: temp});
-                tokens.push(Token {token_type: "SCOPE".to_string(), value: (asts.len() - 1).to_string()});
+                tokens.push(Token {token_type: "SCOPE".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
             }
     
         }
 
 
         if char == '[' && !dquote && !squote {
-            tokens.push(Token {token_type: "LBRACKET".to_string(), value: "[".to_string()});
+            tokens.push(Token {token_type: "LBRACKET".to_string(), value: "[".to_string(), start: char_num.clone()});
             lbrackets.push(Lstore {par: tokens.len() - 1, char: char_num});
         }
 
 
         if char == ']' && !dquote && !squote {
-            tokens.push(Token {token_type: "RBRACKET".to_string(), value: "]".to_string()});
+            tokens.push(Token {token_type: "RBRACKET".to_string(), value: "]".to_string(), start: char_num.clone() - 1});
 
             if lbrackets.len() == 0 {
                 errors.push(PErr{error:3, char: char_num});    //ERROR
@@ -330,27 +340,29 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
              if temp.len() == 0 {
                     tokens.pop();
                     tokens.pop();
-                    tokens.push(Token {token_type: "EBRACKETS".to_string(), value: "[]".to_string()});
+                    tokens.push(Token {token_type: "EBRACKETS".to_string(), value: "[]".to_string(), start: char_num.clone() - 1});
              }
              
              
              else {
+                let temp_len: usize = temp.len();
                 tokens.pop(); tokens.pop();
                 asts.push(AST {children: temp});
-                tokens.push(Token {token_type: "LIST".to_string(), value: (asts.len() - 1).to_string()});
+                tokens.push(Token {token_type: "LIST".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
             }
 
         }
+
 
         if char == '"' && !squote {     //Makes sure that the character is not a part of a string
 
             if tokens[tokens.len() - 1].token_type == "BSLASH" {     //Makes sure that if an escaoed character is used, it is added to the current string instead of being treated as a quote
                 tokens.pop();
-                tokens.push(Token {token_type: "CHAR".to_string(), value: '"'.to_string()});
+                tokens.push(Token {token_type: "CHAR".to_string(), value: '"'.to_string(), start: char_num.clone() - 1});
             }
 
             else {
-                tokens.push(Token {token_type: "DQUOTE".to_string(), value: '"'.to_string()});
+                tokens.push(Token {token_type: "DQUOTE".to_string(), value: '"'.to_string(), start: char_num.clone()});
 
                 if dquote {     //Preps the string to be added to the tokens
                     tokens.pop(); tokens.pop();     //Removes the quotes from the tokens list bc they are not needed
@@ -361,7 +373,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                         errors.push(PErr{error:8, char: char_num - 1});    //ERROR
                     }
 
-                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()});
+                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()[1..string.len() - 1].to_string(), start: char_num.clone() - string.len() as i64});
                     string = String::from("");
                     dquote = false;
                 }
@@ -372,15 +384,16 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
             }
         }
 
+
         if char == '\'' && !dquote{     //Makes sure that the character is not a part of a string
 
-            if tokens[tokens.len() - 1].token_type == "BSLASH" {    //Makes sure that if an escaoed character is used, it is added to the current char instead of being treated as a quote
+            if tokens[tokens.len() - 1].token_type == "BSLASH" {    //Makes sure that if an escape character is used, it is added to the current char instead of being treated as a quote
                 tokens.pop();
-                tokens.push(Token {token_type: "CHAR".to_string(), value: '\''.to_string()});
+                tokens.push(Token {token_type: "CHAR".to_string(), value: '\''.to_string(), start: char_num.clone() - 1});
             }
 
             else {
-                tokens.push(Token {token_type: "SQUOTE".to_string(), value: '\''.to_string()});
+                tokens.push(Token {token_type: "SQUOTE".to_string(), value: '\''.to_string(), start: char_num.clone()});
 
                 if squote {     //Preps the string to be added to the tokens
 
@@ -392,7 +405,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                     tokens.pop(); tokens.pop();
                     
                     string.push(char);
-                    tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone().chars().nth(1).unwrap().to_string()});
+                    tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone().chars().nth(1).unwrap().to_string(), start: char_num.clone() - 1});
                     string = String::from("");
                     squote = false;
                 }
@@ -402,6 +415,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                 }
             }
         }
+
 
         if dquote {     //"" Work to add it to the current string
 
@@ -430,28 +444,29 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
     if !(num == "") {   //Last checks in case the last character was a number (It't wont add otherwise because it would need another cycle)
         if num_point {
-            tokens.push(Token {token_type: "FLOAT".to_string(), value: num.clone()});
+            tokens.push(Token {token_type: "FLOAT".to_string(), value: num.clone(), start: char_num - num.len() as i64});
         }
         else {
-            tokens.push(Token {token_type: "INT".to_string(), value: num.clone()});
+            tokens.push(Token {token_type: "INT".to_string(), value: num.clone(), start: char_num - num.len() as i64});
         }
     }
 
     if !(string == "") {    //Same but with letters
 
         if keywords.contains(&string) {
-            tokens.push(Token {token_type: "KEYWORD".to_string(), value: string.clone()});
+            tokens.push(Token {token_type: "KEYWORD".to_string(), value: string.clone(), start: char_num - string.len() as i64});
         }
 
         else {
             if string.len() == 1 {
-                tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
+                tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone(), start: char_num - 1 as i64});
             }
             else {
-                tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone()});
+                tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone(), start: char_num - string.len() as i64});
             }
         }
     }
+
 
     if dquote {
 
@@ -530,6 +545,8 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
     let mut line_asts: Vec<Vec<i64>> = Vec::new();
     let mut semicolon: bool = false;
 
+
+
     for i in tokens.clone() {
 
         if i.token_type == "SEMICOLON" {
@@ -556,6 +573,10 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
     }
 
+    if !semicolon {
+        errors.push(PErr{error:11, char: text.len() as i64});    //ERROR
+    }
+
     return (lines, asts, errors, line_asts);
 
 }
@@ -565,8 +586,11 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 pub struct Token {
     pub token_type: String,
     pub value: String,
+    pub start: i64,
 }
 
+#[derive(Clone)]
+#[derive(Debug)]
 pub struct AST {
     pub children: Vec<Token>,
 }
