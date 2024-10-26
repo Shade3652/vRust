@@ -1,7 +1,7 @@
 //use std::collections::HashMap;
 
 
-pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec<PErr>, Vec<Token>, i64) {
+pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i64>>) {
 
     let mut string: String = String::from("");  //Number vars
     let mut num: String = String::from("");
@@ -12,10 +12,11 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
     let mut dquote: bool = false;
     let mut squote: bool = false;
 
-    let keywords: String = "println".to_string();
+    let keywords: String = "".to_string();
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
+    let mut lines: Vec<Vec<Token>> = Vec::new();
 
     let mut lbraces: Vec<Lstore> = Vec::new();   //Brace vars
     let mut brace_sets: Vec<ParPairs> = Vec::new();
@@ -169,14 +170,40 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
                 }
 
                 if temp.len() == 0 {
-                    tokens.pop();
-                    tokens.pop();
-                    tokens.push(Token {token_type: "EPARS".to_string(), value: "()".to_string()});
+
+                    if tokens[tokens.len() - 1].token_type == "CHARSTR" {
+                            
+                        let temp_value = tokens[tokens.len() - 1].value.clone();
+                        tokens.pop();
+    
+                        tokens.push(Token {token_type: "FUNC".to_string(), value: temp_value});
+                        tokens.push(Token {token_type: "ARGS".to_string(), value: "0".to_string()});
+                    }
+
+                    else {
+                        tokens.pop();
+                        tokens.pop();
+                        tokens.push(Token {token_type: "EPARS".to_string(), value: "()".to_string()});
+                    }
                 }
 
                 else {
                     asts.push(AST {children: temp});
-                    tokens.insert(paren_sets[paren_sets.len() - 1].l + 1, Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string()});
+                    tokens.pop(); tokens.pop();
+
+                    if tokens[tokens.len() - 1].token_type == "CHARSTR" {
+
+                        let temp_value = tokens[tokens.len() - 1].value.clone();
+                        tokens.pop();
+
+                        tokens.push(Token {token_type: "FUNC".to_string(), value: temp_value});
+                        tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string()});
+
+                    }
+
+                    else {
+                        tokens.push(Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string()});
+                    }
                 }
                 
             }
@@ -268,8 +295,9 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
             }
             
             else {
+                tokens.pop(); tokens.pop();
                 asts.push(AST {children: temp});
-                tokens.insert(brace_sets[brace_sets.len() - 1].l + 1, Token {token_type: "SCOPE".to_string(), value: (asts.len() - 1).to_string()});
+                tokens.push(Token {token_type: "SCOPE".to_string(), value: (asts.len() - 1).to_string()});
             }
     
         }
@@ -307,9 +335,10 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
              
              
              else {
+                tokens.pop(); tokens.pop();
                 asts.push(AST {children: temp});
-                tokens.insert(bracket_sets[bracket_sets.len() - 1].l + 1, Token {token_type: "LIST".to_string(), value: (asts.len() - 1).to_string()});
-             }
+                tokens.push(Token {token_type: "LIST".to_string(), value: (asts.len() - 1).to_string()});
+            }
 
         }
 
@@ -409,11 +438,18 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
     }
 
     if !(string == "") {    //Same but with letters
-        if string.len() == 1 {
-            tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
+
+        if keywords.contains(&string) {
+            tokens.push(Token {token_type: "KEYWORD".to_string(), value: string.clone()});
         }
+
         else {
-            tokens.push(Token {token_type: "CHARSTRs".to_string(), value: string.clone()});
+            if string.len() == 1 {
+                tokens.push(Token {token_type: "CHAR".to_string(), value: string.clone()});
+            }
+            else {
+                tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone()});
+            }
         }
     }
 
@@ -489,11 +525,43 @@ pub fn parse(text: &String, variables: Vec<Token>) -> (Vec<Token>, Vec<AST>, Vec
     }
 
 
-    return (tokens, asts, errors, variables, char_num);
+    let mut temp_line: Vec<Token> = Vec::new();
+    let mut cur_line_asts: Vec<i64> = Vec::new();
+    let mut line_asts: Vec<Vec<i64>> = Vec::new();
+    let mut semicolon: bool = false;
+
+    for i in tokens.clone() {
+
+        if i.token_type == "SEMICOLON" {
+
+            semicolon = true;
+
+            lines.push(temp_line);
+
+            line_asts.push(cur_line_asts);
+            temp_line = Vec::new();
+            cur_line_asts = Vec::new();
+        }
+
+        else {
+
+            if i.token_type == String::from("AST") {
+                cur_line_asts.push((i.value.clone()).parse::<i64>().unwrap());
+            }
+
+            semicolon = false;
+            temp_line.push(i.clone());
+
+        }
+
+    }
+
+    return (lines, asts, errors, line_asts);
 
 }
 
 #[derive(Clone)]
+#[derive(Debug)]
 pub struct Token {
     pub token_type: String,
     pub value: String,

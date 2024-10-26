@@ -3,22 +3,20 @@ use std::fs;
 use serde_json::Value;
 use std::env;
 use colored::Colorize;
-use std::path::Path;
 
 #[path = "lang/stdio/out.rs"]
 mod out;
 
 
 fn main() {
-    let vars: Vec<parser::Token> = Vec::new();
     let current_path = env::current_dir().unwrap().into_os_string().into_string().unwrap();
-    //let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420.gg sussy\\\" \" fellas in paris // 3.14\" 's' \"'k\" '\"'");
+    //let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420.gg sussy\\\" \" fellas in paris // 3.14\" 's' \"'k\" '\"';");
     let line: String = fs::read_to_string(current_path.to_string() + "/src/testing.tde").expect("Couldn't find or load that file.");
-    let parsed: (Vec<parser::Token>, Vec<parser::AST>, Vec<parser::PErr>, Vec<parser::Token>, i64)= parser::parse(&line, vars);
-    let tokens: Vec<parser::Token> = parsed.0;
+    let parsed: (Vec<Vec<parser::Token>>, Vec<parser::AST>, Vec<parser::PErr>, Vec<Vec<i64>>)= parser::parse(&line);
+    let tokens: Vec<Vec<parser::Token>> = parsed.0;
     let asts: Vec<parser::AST> = parsed.1;
     let errors: Vec<parser::PErr> = parsed.2;
-    let vars: Vec<parser::Token> = parsed.3;
+    let lines: Vec<Vec<i64>> = parsed.3;
     let mut count: i32 = 0;
 
 
@@ -30,8 +28,10 @@ fn main() {
     if errors.len() == 0 {
 
         for i in &tokens {
-            println!("Token: {} | Value: {} ({})", i.token_type, i.value, count);
-            count += 1;
+            for j in i {
+                println!("Token: {} | Value: {} ({})", j.token_type, j.value, count);
+                count += 1;
+            }
         }
 
 
@@ -45,7 +45,6 @@ fn main() {
                 
             }
         }
-
     }
 
 
@@ -79,4 +78,23 @@ fn main() {
     }
 
     out::println();
+
+
+
+
+    //THE ACTUAL STUFF
+    let mut skip: i32 = 0;
+
+    for j in tokens {
+
+
+        for i in j {
+
+            if skip > 0 {   //Token tomfoolery
+                skip -= 1;
+                continue;
+            }
+
+        }
+    }
 }
