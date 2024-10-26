@@ -12,6 +12,9 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
     let mut dquote: bool = false;
     let mut squote: bool = false;
 
+    let mut esc_char_last = false;
+    let mut newline_in_string = false;
+
     let keywords: String = "".to_string();
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
@@ -189,6 +192,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                         tokens.push(Token {token_type: "EPARS".to_string(), value: "()".to_string(), start: char_num.clone() - 1});
                     }
                 }
+
 
                 else {
                     let temp_len: usize = temp.len();
@@ -369,13 +373,18 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
                     string.push(char);
 
-                    if (string.clone().get(1..(string.len() - 1)).unwrap().to_string()).len() == 1 {    //Check to see if the string is a char
+                    if (string.clone().get(1..(string.len() - 1)).unwrap().to_string()).len() == 1 && !newline_in_string{    //Check to see if the string is a char
+
                         errors.push(PErr{error:8, char: char_num - 1});    //ERROR
                     }
 
-                    tokens.push(Token {token_type: "STRING".to_string(), value: string.clone()[1..string.len() - 1].to_string(), start: char_num.clone() - string.len() as i64});
+                    let string_len: usize = string.len();
+
+
+                    tokens.push(Token {token_type: "STRING".to_string(), value: string[1..string_len - 1].to_string(), start: char_num.clone() - string_len as i64});
                     string = String::from("");
                     dquote = false;
+                    newline_in_string = false;
                 }
 
                 else {
@@ -419,11 +428,33 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
         if dquote {     //"" Work to add it to the current string
 
+        if esc_char_last {
+
+            if char == 'n' {            
+                string = string[0..string.len() - 1].to_string();
+
+                string = string + "\n";
+
+                newline_in_string = true;
+
+            }
+        }
+
             if tokens[tokens.len() - 1].token_type != "DQUOTE" && !("()[]{}".contains(&tokens[tokens.len() - 1].token_type)) {
                 tokens.pop();    //WAY easier than then stoping anything from adding to the tokens list
             }
 
-            string.push(char);
+            if !esc_char_last {
+                string.push(char);
+            }
+
+            if char == '\\' {
+                esc_char_last = true;
+            }
+    
+            else {
+                esc_char_last = false;
+            }
         }
 
         if squote {     //Same but with ''

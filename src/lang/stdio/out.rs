@@ -1,7 +1,7 @@
 use crate::parser;
 use crate::VAR;
 
-pub fn println(args: parser::AST, line_asts: Vec<parser::AST>, variables: Vec<VAR>) -> i64{
+pub fn println(args: &parser::AST, line_asts: &Vec<parser::AST>, variables: &Vec<VAR>) -> i64{
 
     if args.children.len() != 0 {
         //Argument error: 1 argument expected, # were given
@@ -29,7 +29,7 @@ pub fn println(args: parser::AST, line_asts: Vec<parser::AST>, variables: Vec<VA
 }
 
 
-pub fn print(args: parser::AST, line_asts: Vec<parser::AST>, variables: Vec<VAR>) -> i64{
+pub fn print(args: &parser::AST, line_asts: &Vec<parser::AST>, variables: &Vec<VAR>) -> i64{
 
     if args.children.len() != 0 {
         //Argument error: 1 argument expected, # were given

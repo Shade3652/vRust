@@ -6,7 +6,7 @@ mod stdio_find;
 
 pub fn find(name: String, args: parser::AST, asts: Vec<parser::AST>, variables: Vec<VAR>) {
 
-    if "println".contains(&name) {
+    if "println print ".contains(&name) {
         let out = stdio_find::main(name, args, asts, variables);
     }
     
