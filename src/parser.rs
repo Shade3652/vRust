@@ -182,7 +182,18 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                         tokens.pop();
                         
                         let temp_value_len: usize = temp_value.len();
-                        tokens.push(Token {token_type: "FUNC".to_string(), value: temp_value, start: char_num.clone() - 1 - temp_value_len as i64});
+
+                        println!("{}", temp_value.chars().nth(0).unwrap());
+
+
+                        if temp_value.chars().nth(0) == Some('.') && tokens[tokens.len() - 1].token_type == "CHARSTR" {
+                            let mut new_last = tokens[tokens.len() - 1].clone();
+                            new_last.value = "CLASS".to_string();
+                            tokens.pop();
+                            tokens.push(new_last);
+                        }
+
+                        tokens.push(Token {token_type: "FUNC_CALL".to_string(), value: temp_value, start: char_num.clone() - 1 - temp_value_len as i64});
                         tokens.push(Token {token_type: "ARGS".to_string(), value: "0".to_string(), start: char_num.clone() - 1});
                     }
 
@@ -205,7 +216,17 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                         let temp_value_len: usize = temp_value.len();
                         tokens.pop();
 
-                        tokens.push(Token {token_type: "FUNC".to_string(), value: temp_value, start: char_num.clone() - temp_len as i64 - temp_value_len as i64});
+                        println!("{}", temp_value.chars().nth(0).unwrap());
+
+                        
+                        if temp_value.chars().nth(0) == Some('.') && tokens[tokens.len() - 1].token_type == "CHARSTR" {
+                            let mut new_last = tokens[tokens.len() - 1].clone();
+                            new_last.token_type = "CLASS_REF".to_string();
+                            tokens.pop();
+                            tokens.push(new_last);
+                        }
+
+                        tokens.push(Token {token_type: "FUNC_CALL".to_string(), value: temp_value, start: char_num.clone() - temp_len as i64 - temp_value_len as i64});
                         tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
 
                     }

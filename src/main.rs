@@ -50,6 +50,7 @@ fn main() {
                 println!("Token: {} | Value: {}", j.token_type, j.value);
                 
             }
+            println!("______________");
         }
     }
 
@@ -109,8 +110,8 @@ fn main() {
                 //AST solver
             }
 
-            if i.token_type == "FUNC" {
-                function_find::find(i.value, asts[line_num as usize].clone(), asts.clone(), variables.clone());
+            if i.token_type == "FUNC_CALL" {
+                function_find::find(i.value, asts[line_num as usize].clone(), asts.clone(), variables.clone(), line_num);
             }
         }
 
@@ -124,4 +125,10 @@ struct VAR {
     name: String,
     var_type: String,
     value: String,
+}
+
+struct ERROR {
+    error: String,
+    char: i32,
+    line: i32,
 }

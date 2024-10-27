@@ -1,7 +1,8 @@
-use crate::parser;
+use crate::parser::AST;
 use crate::VAR;
+use crate::ERROR;
 
-pub fn println(args: &parser::AST, line_asts: &Vec<parser::AST>, variables: &Vec<VAR>) -> i64{
+pub fn println(args: &AST, line_asts: &Vec<AST>, variables: &Vec<VAR>, line_number: i64) -> Vec<crate::ERROR>{
 
     if args.children.len() != 0 {
         //Argument error: 1 argument expected, # were given
@@ -25,11 +26,11 @@ pub fn println(args: &parser::AST, line_asts: &Vec<parser::AST>, variables: &Vec
         println!("{}", args.children[0].value);
     }
 
-    return 1;
+    return Vec::new();
 }
 
 
-pub fn print(args: &parser::AST, line_asts: &Vec<parser::AST>, variables: &Vec<VAR>) -> i64{
+pub fn print(args: &AST, line_asts: &Vec<AST>, variables: &Vec<VAR>, line_number: i64) -> i64{
 
     if args.children.len() != 0 {
         //Argument error: 1 argument expected, # were given
