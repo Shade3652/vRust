@@ -15,7 +15,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
     let mut esc_char_last = false;
     let mut newline_in_string = false;
 
-    let keywords: String = "".to_string();
+    let keywords: String = "let".to_string();
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
@@ -101,8 +101,6 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
             if keywords.contains(&string) {
 
-                
-
                 tokens.push(Token {token_type: "KEYWORD".to_string(), value: string.clone(), start: (char_num - string.len() as i64)}); //Puts the keyword in the tokens list
             }
 
@@ -114,8 +112,8 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                     else {
                         tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone(),start: (char_num - string.len() as i64)});
                     }
-                    string = String::from("");
                 }
+                string = "".to_string();
             }
         }
 
@@ -163,78 +161,47 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                 break;
             }
 
+
             paren_sets.push(ParPairs{l: lpars[lpars.len() - 1].par, r: (tokens.len() - 1).try_into().unwrap()});
             lpars.pop();
 
             
             //P2: Adding a AST object
-            let temp: Vec<Token> = tokens[paren_sets[paren_sets.len() - 1].l + 1.. paren_sets[paren_sets.len() - 1].r].to_vec();
+            let to_be_added: Vec<Token> = tokens[paren_sets[paren_sets.len() - 1].l + 1.. paren_sets[paren_sets.len() - 1].r].to_vec();
 
-                for _i in &temp {
+                for _i in &to_be_added {
                     tokens.remove(paren_sets[paren_sets.len() - 1].l + 1);
                 }
 
-                if temp.len() == 0 {
+                asts.push(AST {children: to_be_added});
+                tokens.pop(); tokens.pop();
 
-                    if tokens[tokens.len() - 1].token_type == "CHARSTR" {
-                            
-                        let temp_value = tokens[tokens.len() - 1].value.clone();
-                        tokens.pop();
-                        
-                        let temp_value_len: usize = temp_value.len();
+                
+                let mut temp_token = Token{token_type: "NULL".to_string(), value: "NULL".to_string(), start: 0};
 
-                        println!("{}", temp_value.chars().nth(0).unwrap());
-
-
-                        if temp_value.chars().nth(0) == Some('.') && tokens[tokens.len() - 1].token_type == "CHARSTR" {
-                            let mut new_last = tokens[tokens.len() - 1].clone();
-                            new_last.value = "CLASS".to_string();
-                            tokens.pop();
-                            tokens.push(new_last);
-                        }
-
-                        tokens.push(Token {token_type: "FUNC_CALL".to_string(), value: temp_value, start: char_num.clone() - 1 - temp_value_len as i64});
-                        tokens.push(Token {token_type: "ARGS".to_string(), value: "0".to_string(), start: char_num.clone() - 1});
-                    }
-
-                    else {
-                        tokens.pop();
-                        tokens.pop();
-                        tokens.push(Token {token_type: "EPARS".to_string(), value: "()".to_string(), start: char_num.clone() - 1});
-                    }
+                if tokens.len() > 3 {
+                    temp_token = tokens[tokens.len() - 2].clone();
                 }
+            
 
+                if tokens[tokens.len() - 1].token_type == "CHARSTR" && !("let".contains(&temp_token.value)){
+
+                    let mut temp_token = tokens.pop().unwrap();
+                    temp_token.token_type = "FUNC_CALL".to_string();
+
+                    tokens.push(temp_token);
+   
+
+                    tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string(), start: asts[asts.len() - 1].children[0].start});
+                }
 
                 else {
-                    let temp_len: usize = temp.len();
-                    asts.push(AST {children: temp});
-                    tokens.pop(); tokens.pop();
-
-                    if tokens[tokens.len() - 1].token_type == "CHARSTR" {
-
-                        let temp_value: String = tokens[tokens.len() - 1].value.clone();
-                        let temp_value_len: usize = temp_value.len();
-                        tokens.pop();
-
-                        println!("{}", temp_value.chars().nth(0).unwrap());
-
-                        
-                        if temp_value.chars().nth(0) == Some('.') && tokens[tokens.len() - 1].token_type == "CHARSTR" {
-                            let mut new_last = tokens[tokens.len() - 1].clone();
-                            new_last.token_type = "CLASS_REF".to_string();
-                            tokens.pop();
-                            tokens.push(new_last);
-                        }
-
-                        tokens.push(Token {token_type: "FUNC_CALL".to_string(), value: temp_value, start: char_num.clone() - temp_len as i64 - temp_value_len as i64});
-                        tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
-
-                    }
-
-                    else {
-                        tokens.push(Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
-                    }
+                    tokens.push(Token {token_type: "AST".to_string(), value: (asts.len() - 1).to_string(), start: asts[asts.len() - 1].children[0].start});
                 }
+
+
+                
+                
                 
             }
 
@@ -517,6 +484,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                 tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone(), start: char_num - string.len() as i64});
             }
         }
+        string = String::from("");
     }
 
 
@@ -591,7 +559,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
         errors.push(PErr{error:6, char: lbrackets[0].char as i64});    //ERROR
     }
 
-
+    println!("{}", asts.len());
     let mut temp_line: Vec<Token> = Vec::new();
     let mut cur_line_asts: Vec<i64> = Vec::new();
     let mut line_asts: Vec<Vec<i64>> = Vec::new();
@@ -625,7 +593,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
     }
 
-    if !semicolon {
+    if !semicolon{
         errors.push(PErr{error:11, char: text.len() as i64});    //ERROR
     }
 
