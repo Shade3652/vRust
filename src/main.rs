@@ -17,7 +17,7 @@ fn main() {
     let current_path = env::current_dir().unwrap().into_os_string().into_string().unwrap();
     //let line: String = String::from(" L bozo (3 / (45 * 678)) - 9.0 + 12.3 //[skib && 69] 7 sigma \" lol + sussy\" {what 3 || 3.14} () [] {} eee3 420.69 69.420.gg sussy\\\" \" fellas in paris // 3.14\" 's' \"'k\" '\"';");
     let line: String = fs::read_to_string(current_path.to_string() + "/src/testing.tde").expect("Couldn't find or load that file.");
-    let parsed: (Vec<Vec<parser::Token>>, Vec<parser::AST>, Vec<parser::PErr>, Vec<Vec<i64>>)= parser::parse(&line);
+    let parsed: (Vec<Vec<parser::Token>>, Vec<parser::AST>, Vec<parser::PErr>, Vec<Vec<i64>>, Vec<Vec<parser::Token>>, Vec<Vec<i64>>)= parser::parse(&line);
     let mut variables: Vec<VAR> = Vec::new();
     let mut variable_names: Vec<String> = Vec::new();
 
@@ -25,9 +25,10 @@ fn main() {
     let mut asts: Vec<parser::AST> = parsed.1;
     let errors: Vec<parser::PErr> = parsed.2;
     let line_asts: Vec<Vec<i64>> = parsed.3;
+    let scopes: Vec<Vec<parser::Token>> = parsed.4;
+    let scope_asts: Vec<Vec<i64>> = parsed.5;
 
     let mut count: i32 = 0;
-
 
     let contents = fs::read_to_string((current_path.to_string() + "/src/Errors/Parsing.json").to_owned()).expect("Re-Install. Parsing errors list not found");
     let parsing_errors: Value = serde_json::from_str(&contents).expect("Re-Install. Parsing errors list is corrupted.");
@@ -85,6 +86,9 @@ fn main() {
         }
     }
     (variables, variable_names, asts) = execute(lines, asts, variables, variable_names, line_asts);
+
+
+    //function_find::find(i.value.clone(), line_num.clone(), asts.clone(), variables.clone(), line_num);
 }
 
 
@@ -169,7 +173,7 @@ fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut varia
                             }
                         }
 
-                        
+
                         for l in &to_remove {
                             asts[*k as usize].children.remove(*l as usize);
                         }
@@ -181,8 +185,6 @@ fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut varia
                         }
 
                         to_add.clear();
-
-                        println!("{:?}", asts[*k as usize].children);
 
                         m += 1;
                     }
@@ -207,9 +209,10 @@ fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut varia
         token_num = 0;
     }
 
-    for i in &variables {
+    /*for i in &variables {
         println!("Name: {} | Type: {} | Value: {}", i.name, i.var_type, i.value);
-    }
+    }*/
+    
     return (variables, variable_names, asts);
 }
 

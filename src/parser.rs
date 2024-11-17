@@ -1,7 +1,7 @@
 //use std::collections::HashMap;
 
 
-pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i64>>) {
+pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i64>>, Vec<Vec<Token>>, Vec<Vec<i64>>) {
 
     let mut string: String = String::from("");  //Number vars
     let mut num: String = String::from("");
@@ -15,7 +15,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
     let mut esc_char_last = false;
     let mut newline_in_string = false;
 
-    let keywords: String = "let true false".to_string();
+    let keywords: String = "let true false if".to_string();
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
@@ -173,7 +173,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                     tokens.remove(paren_sets[paren_sets.len() - 1].l + 1);
                 }
 
-                asts.push(AST {children: to_be_added});
+                asts.push(AST {children: to_be_added, ast_type: "AST".to_string()});
                 tokens.pop(); tokens.pop();
 
                 
@@ -184,7 +184,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                 }
             
 
-                if tokens[tokens.len() - 1].token_type == "CHARSTR" && !("let".contains(&temp_token.value)){
+                if tokens[tokens.len() - 1].token_type == "CHARSTR" && !(keywords.contains(&temp_token.value)){
 
                     let mut temp_token = tokens.pop().unwrap();
                     temp_token.token_type = "FUNC_CALL".to_string();
@@ -303,7 +303,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
             else {
                 let temp_len: usize = temp.len();
                 tokens.pop(); tokens.pop();
-                asts.push(AST {children: temp});
+                asts.push(AST {children: temp, ast_type: "SCOPE".to_string()});
                 tokens.push(Token {token_type: "SCOPE".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
             }
     
@@ -344,7 +344,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
              else {
                 let temp_len: usize = temp.len();
                 tokens.pop(); tokens.pop();
-                asts.push(AST {children: temp});
+                asts.push(AST {children: temp, ast_type: "LIST".to_string()});
                 tokens.push(Token {token_type: "LIST".to_string(), value: (asts.len() - 1).to_string(), start: char_num.clone() - temp_len as i64});
             }
 
@@ -564,11 +564,13 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
         errors.push(PErr{error:6, char: lbrackets[0].char as i64});    //ERROR
     }
 
-    println!("{}", asts.len());
+    //println!("{}", asts.len());
     let mut temp_line: Vec<Token> = Vec::new();
     let mut cur_line_asts: Vec<i64> = Vec::new();
     let mut line_asts: Vec<Vec<i64>> = Vec::new();
     let mut semicolon: bool = false;
+    let mut scopes: Vec<Vec<Token> > = Vec::new();
+    let mut scope_asts: Vec<Vec<i64>> = Vec::new();
 
 
 
@@ -602,7 +604,48 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
         errors.push(PErr{error:11, char: text.len() as i64});    //ERROR
     }
 
-    return (lines, asts, errors, line_asts);
+
+    temp_line = Vec::new();
+    cur_line_asts = Vec::new();
+
+
+    for i in &asts{
+
+        if i.ast_type == "SCOPE" {
+
+            for k in i.children.clone() {
+
+                if k.token_type == "SEMICOLON" {
+
+                    semicolon = true;
+
+                    scopes.push(temp_line);
+
+                    scope_asts.push(cur_line_asts);
+                    temp_line = Vec::new();
+                    cur_line_asts = Vec::new();
+                }
+
+                else {
+
+                    if k.token_type == String::from("AST") {
+                        cur_line_asts.push((k.value.clone()).parse::<i64>().unwrap());
+                    }
+
+                    semicolon = false;
+                    temp_line.push(k.clone());
+
+                }
+
+            }
+        }
+    }
+
+    if !semicolon{
+        errors.push(PErr{error:12, char: text.len() as i64});    //ERROR
+    }
+
+    return (lines, asts, errors, line_asts, scopes, scope_asts);
 
 }
 
@@ -618,6 +661,7 @@ pub struct Token {
 #[derive(Debug)]
 pub struct AST {
     pub children: Vec<Token>,
+    pub ast_type: String,
 }
 
 pub struct PErr {

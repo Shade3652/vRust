@@ -55,7 +55,12 @@
     },
 
     "11": {
-        "message": "No closing ;",
+        "message": "No closing ; in the file",
         "suggestion": "Consider adding a ; the end of the file"
+    },
+
+    "12": {
+        "message": "No closing ; in the scope",
+        "suggestion": "Consider adding a ; the end of the scope"
     }
 }

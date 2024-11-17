@@ -19,4 +19,4 @@ println("AHH");
 
 whoops();
 
-if (why = why) {sus};
+if (why = why) {println("SIIIGGGGMMMAAAA");};
