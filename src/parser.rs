@@ -15,7 +15,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
     let mut esc_char_last = false;
     let mut newline_in_string = false;
 
-    let keywords: String = "let".to_string();
+    let keywords: String = "let true false".to_string();
 
     let mut tokens: Vec<Token> = Vec::new();    //Token vars
     let mut asts: Vec<AST> = Vec::new();
@@ -191,8 +191,13 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
                     tokens.push(temp_token);
    
+                    if asts[asts.len() - 1].children.len() > 0 {
+                        tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string(), start: asts[asts.len() - 1].children[0].start});
 
-                    tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string(), start: asts[asts.len() - 1].children[0].start});
+                    }
+                    else {
+                        tokens.push(Token {token_type: "ARGS".to_string(), value: (asts.len() - 1).to_string(), start: tokens[tokens.len() - 1].start + (tokens[tokens.len() - 1].value).len() as i64});
+                    }
                 }
 
                 else {

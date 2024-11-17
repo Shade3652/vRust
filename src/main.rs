@@ -29,8 +29,8 @@ fn main() {
     let mut count: i32 = 0;
 
 
-    let contents = fs::read_to_string((current_path.to_string() + "/src/Errors/Parsing.json").to_owned()).expect("Couldn't find or load that file.");
-    let parsing_errors: Value = serde_json::from_str(&contents).expect("Couldn't parse that file.");
+    let contents = fs::read_to_string((current_path.to_string() + "/src/Errors/Parsing.json").to_owned()).expect("Re-Install. Parsing errors list not found");
+    let parsing_errors: Value = serde_json::from_str(&contents).expect("Re-Install. Parsing errors list is corrupted.");
 
 
     if errors.len() == 0 {
@@ -84,9 +84,12 @@ fn main() {
             return;
         }
     }
+    (variables, variable_names, asts) = execute(lines, asts, variables, variable_names, line_asts);
+}
 
 
-    //THE ACTUAL STUFF
+
+fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut variables: Vec<VAR>, mut variable_names: Vec<String>, line_asts: Vec<Vec<i64>>) -> (Vec<VAR>, Vec<String>, Vec<parser::AST>) {
     let mut skip: i32 = 0;
 
     let mut line_num: i64 = 0;
@@ -133,8 +136,57 @@ fn main() {
                 continue;
             }
 
-            if line_asts[line_num as usize].len() > 0 {
-                //AST solver
+
+            if line_asts[line_num as usize].len() > 0 {     //AST Solver
+
+                for k in &line_asts[line_num as usize] {
+
+                    for i in &mut asts[*k as usize].children {  //Subs in variables for their values
+                            if i.token_type == "VAR" {
+                
+                                i.token_type = variables[i.value.parse::<usize>().unwrap()].var_type.clone().to_uppercase();
+                                i.value = variables[i.value.parse::<usize>().unwrap()].value.clone();
+                            }
+                    }
+
+
+                    let mut m: i64 = 0;
+
+                    let mut to_remove: Vec<i64> = Vec::new();
+                    let mut to_add: Vec<(parser::Token, i64)> = Vec::new();
+
+                    for l in &asts[*k as usize].children.clone() {
+
+                        if "DEQUAL NEQUAL".contains(&l.token_type) && m != 0 && m < asts[*k as usize].children.len() as i64 - 1{
+                            if &asts[*k as usize].children[m as usize - 1].token_type == &asts[*k as usize].children[m as usize + 1].token_type {     //Makes sure the two compared values are comparable
+
+                                if &asts[*k as usize].children[m as usize - 1].value == &asts[*k as usize].children[m as usize + 1].value {
+
+                                    //to_add.push((parser::Token{token_type: "KEYWORD".to_string(), value: "TRUE".to_string(), start: asts[*k as usize].children[m as usize - 1].start}, m - 1));
+                                    to_remove.push(m - 1);    to_remove.push(m - 1);    to_remove.push(m - 1);
+                                    to_add.push((parser::Token{token_type: "KEYWORD".to_string(), value: "true".to_string(), start: asts[*k as usize].children[m as usize - 1].start}, m - 1));
+                                }
+                            }
+                        }
+
+                        
+                        for l in &to_remove {
+                            asts[*k as usize].children.remove(*l as usize);
+                        }
+
+                        to_remove.clear();
+
+                        for i in &to_add {
+                            asts[*k as usize].children.insert(i.1 as usize, i.0.clone());
+                        }
+
+                        to_add.clear();
+
+                        println!("{:?}", asts[*k as usize].children);
+
+                        m += 1;
+                    }
+                }
             }
 
             if i.token_type == "FUNC_CALL" {
@@ -158,6 +210,7 @@ fn main() {
     for i in &variables {
         println!("Name: {} | Type: {} | Value: {}", i.name, i.var_type, i.value);
     }
+    return (variables, variable_names, asts);
 }
 
 

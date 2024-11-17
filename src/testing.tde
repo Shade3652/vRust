@@ -15,3 +15,8 @@ let skibidy (String) = "lol";
 
 println(skibidy);
 println("AHH");
+
+
+whoops();
+
+if (why = why) {sus};
