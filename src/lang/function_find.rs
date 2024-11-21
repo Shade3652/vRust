@@ -19,7 +19,7 @@ pub fn find(name: String, args: i64, asts: Vec<parser::AST>, variables: Vec<VAR>
     }
 
     if "println print ".contains(&name) {
-        let out: Vec<ERROR> = stdio_find::main(name, args, modded_asts, variables, line_number);
+        let out: Vec<ERROR> = stdio_find::main(name, args, modded_asts, line_number);
         return out;
     }
     return Vec::new();

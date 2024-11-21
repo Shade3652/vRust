@@ -5,7 +5,7 @@ println("\n");
 
 let sigma (String) = "skib?";
 
-println(sigma);
+print(sigma);
 
 Errors.raise("sup");
 
@@ -19,4 +19,7 @@ println("AHH");
 
 whoops();
 
-if (why = why) {println("SIIIGGGGMMMAAAA");};
+if (why = why) {
+    println("SIIIGGGGMMMAAAA");
+    println("MIMIMI");
+};

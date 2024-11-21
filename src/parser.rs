@@ -489,7 +489,6 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
                 tokens.push(Token {token_type: "CHARSTR".to_string(), value: string.clone(), start: char_num - string.len() as i64});
             }
         }
-        string = String::from("");
     }
 
 
@@ -570,7 +569,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
     let mut line_asts: Vec<Vec<i64>> = Vec::new();
     let mut semicolon: bool = false;
     let mut scopes: Vec<Vec<Token> > = Vec::new();
-    let mut scope_asts: Vec<Vec<i64>> = Vec::new();
+    let mut scope_line_asts: Vec<Vec<i64>> = Vec::new();
 
 
 
@@ -589,7 +588,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
         else {
 
-            if i.token_type == String::from("AST") {
+            if "AST ARGS".contains(&i.token_type) {
                 cur_line_asts.push((i.value.clone()).parse::<i64>().unwrap());
             }
 
@@ -621,14 +620,14 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
                     scopes.push(temp_line);
 
-                    scope_asts.push(cur_line_asts);
+                    scope_line_asts.push(cur_line_asts);
                     temp_line = Vec::new();
                     cur_line_asts = Vec::new();
                 }
 
                 else {
 
-                    if k.token_type == String::from("AST") {
+                    if "AST ARGS".contains(&k.token_type) {
                         cur_line_asts.push((k.value.clone()).parse::<i64>().unwrap());
                     }
 
@@ -645,7 +644,7 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
         errors.push(PErr{error:12, char: text.len() as i64});    //ERROR
     }
 
-    return (lines, asts, errors, line_asts, scopes, scope_asts);
+    return (lines, asts, errors, line_asts, scopes, scope_line_asts);
 
 }
 

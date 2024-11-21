@@ -1,7 +1,7 @@
 use crate::parser::{Token, AST};
 use crate::VAR;
 
-pub fn keyword_execute(keyword: &Token, line: &Vec<Token>, vars: & mut Vec<VAR>, var_names: &mut Vec<String>, asts: &Vec<AST>, keyword_token_num: &i64) -> (Vec<VAR>, Vec<String>){
+pub fn keyword_execute<'a>(keyword: &'a Token, line: &'a Vec<Token>, vars: &'a mut Vec<VAR>, var_names: &'a mut Vec<String>, asts: &'a Vec<AST>, keyword_token_num: &i64) -> (Vec<VAR>, Vec<String>, AST){
 
     if keyword.value == "let" {
 
@@ -27,6 +27,7 @@ pub fn keyword_execute(keyword: &Token, line: &Vec<Token>, vars: & mut Vec<VAR>,
         }
     }
 
+
     if keyword.value == "if" {
         if let Ok(index) = line[*keyword_token_num as usize + 1].value.parse::<usize>(){
             if asts[index].children.len() == 1 {
@@ -45,13 +46,20 @@ pub fn keyword_execute(keyword: &Token, line: &Vec<Token>, vars: & mut Vec<VAR>,
 
                 if line[2].token_type == "SCOPE" {
                     if asts[index].children[0].token_type == "KEYWORD" && asts[index].children[0].value == "true" {
-                        //Execute the scope
+                        return(vars.to_vec(), var_names.to_vec(), asts[index + 1].clone());
                     }
                 }
+                else {
+                //Error: If statement must be followed up by a scope
+                }
+            }
+
+            else {
+                //Error: If statement must have 1 argument
             }
         }
 
     }
 
-    return(vars.to_vec(), var_names.to_vec());
+    return(vars.to_vec(), var_names.to_vec(), AST{ast_type: "NONE".to_string(), children: Vec::new()});
 }

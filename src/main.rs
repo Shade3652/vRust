@@ -26,9 +26,11 @@ fn main() {
     let errors: Vec<parser::PErr> = parsed.2;
     let line_asts: Vec<Vec<i64>> = parsed.3;
     let scopes: Vec<Vec<parser::Token>> = parsed.4;
-    let scope_asts: Vec<Vec<i64>> = parsed.5;
+    let scope_line_asts: Vec<Vec<i64>> = parsed.5;
 
     let mut count: i32 = 0;
+
+    let mut return_lines: Vec<i64> = Vec::new();
 
     let contents = fs::read_to_string((current_path.to_string() + "/src/Errors/Parsing.json").to_owned()).expect("Re-Install. Parsing errors list not found");
     let parsing_errors: Value = serde_json::from_str(&contents).expect("Re-Install. Parsing errors list is corrupted.");
@@ -53,6 +55,23 @@ fn main() {
                 println!("Token: {} | Value: {}", j.token_type, j.value);
                 
             }
+
+        }
+
+        let mut temp_counter: i64 = 0;
+
+        for i in &scopes {
+            println!("{}", "_______________".red());
+            for j in i {
+                println!("{} {}, {} {}", "Token:".red(), j.token_type.red(), "Value:".red(), j.value.red());
+            }
+            for i in &scope_line_asts[temp_counter as usize] {
+                print!("{:?}", asts[*i as usize].children);
+            }
+            println!("");
+
+            temp_counter += 1;
+
         }
     }
 
@@ -85,7 +104,16 @@ fn main() {
             return;
         }
     }
-    (variables, variable_names, asts) = execute(lines, asts, variables, variable_names, line_asts);
+
+    let mut scope_return: parser::AST;
+    let mut return_line: i64;
+
+    (variables, variable_names, asts, scope_return, return_line) = execute(lines, asts, variables, variable_names, line_asts);
+
+    return_lines.push(return_line);
+
+    (variables, variable_names, asts, scope_return, return_line) = execute(scopes.clone(), asts, variables, variable_names, scope_line_asts.clone());
+
 
 
     //function_find::find(i.value.clone(), line_num.clone(), asts.clone(), variables.clone(), line_num);
@@ -93,14 +121,16 @@ fn main() {
 
 
 
-fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut variables: Vec<VAR>, mut variable_names: Vec<String>, line_asts: Vec<Vec<i64>>) -> (Vec<VAR>, Vec<String>, Vec<parser::AST>) {
+fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut variables: Vec<VAR>, mut variable_names: Vec<String>, line_asts: Vec<Vec<i64>>) -> (Vec<VAR>, Vec<String>, Vec<parser::AST>, parser::AST, i64) {
     let mut skip: i32 = 0;
+
+    let mut scope_return = parser::AST{ast_type: "NONE".to_string(), children: Vec::new()};
 
     let mut line_num: i64 = 0;
 
     let mut token_num: i64 = 0;
 
-    for mut j in lines {
+    for mut j in lines.clone() {
 
         for k in &mut j {
             if k.token_type == "CHARSTR" && variable_names.contains(&k.value) {
@@ -192,7 +222,7 @@ fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut varia
             }
 
             if i.token_type == "FUNC_CALL" {
-                function_find::find(i.value.clone(), line_num.clone(), asts.clone(), variables.clone(), line_num);
+                function_find::find(i.value.clone(), lines[line_num as usize][(token_num + 1) as usize].value.parse::<i64>().unwrap(), asts.clone(), variables.clone(), line_num);
             }
 
             if i.token_type == "KEYWORD" {
@@ -200,6 +230,11 @@ fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut varia
 
                 variables = to_add.0;
                 variable_names = to_add.1;
+                scope_return = to_add.2;
+
+                if scope_return.ast_type != "NONE" {
+                    return (variables, variable_names, asts, scope_return, line_num);
+                }
             }
 
             token_num += 1;
@@ -213,7 +248,7 @@ fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut varia
         println!("Name: {} | Type: {} | Value: {}", i.name, i.var_type, i.value);
     }*/
     
-    return (variables, variable_names, asts);
+    return (variables, variable_names, asts, scope_return, -1);
 }
 
 
