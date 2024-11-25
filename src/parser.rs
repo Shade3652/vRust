@@ -648,16 +648,14 @@ pub fn parse(text: &String) -> (Vec<Vec<Token>>, Vec<AST>, Vec<PErr>, Vec<Vec<i6
 
 }
 
-#[derive(Clone)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Token {
     pub token_type: String,
     pub value: String,
     pub start: i64,
 }
 
-#[derive(Clone)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AST {
     pub children: Vec<Token>,
     pub ast_type: String,

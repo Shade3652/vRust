@@ -21,7 +21,7 @@ fn main() {
     let mut variables: Vec<VAR> = Vec::new();
     let mut variable_names: Vec<String> = Vec::new();
 
-    let lines: Vec<Vec<parser::Token>> = parsed.0;
+    let mut lines: Vec<Vec<parser::Token>> = parsed.0;
     let mut asts: Vec<parser::AST> = parsed.1;
     let errors: Vec<parser::PErr> = parsed.2;
     let line_asts: Vec<Vec<i64>> = parsed.3;
@@ -58,6 +58,7 @@ fn main() {
 
         }
 
+
         let mut temp_counter: i64 = 0;
 
         for i in &scopes {
@@ -91,7 +92,7 @@ fn main() {
                 print!(" ");
             }
             
-            print!("{}", "^\n".to_string().bold().yellow()); //IDK why I have to do this but it fixes a on_white() bug
+            print!("{}", "^\n".to_string().bold().yellow());
 
             for _i in 0..i.char {
                 print!(" ");
@@ -105,14 +106,55 @@ fn main() {
         }
     }
 
+
     let mut scope_return: parser::AST;
     let mut return_line: i64;
+    let mut return_token: i64;
 
-    (variables, variable_names, asts, scope_return, return_line) = execute(lines, asts, variables, variable_names, line_asts);
+    (variables, variable_names, asts, scope_return, return_line, return_token) = execute(lines.clone(), asts, variables, variable_names, line_asts.clone());
 
     return_lines.push(return_line);
 
-    (variables, variable_names, asts, scope_return, return_line) = execute(scopes.clone(), asts, variables, variable_names, scope_line_asts.clone());
+    let break_loop: bool;
+
+    if scope_return.ast_type != "NONE" {
+        break_loop = false;
+    }
+    else {
+        break_loop = true;
+    }
+
+
+    loop {
+
+        if break_loop {
+            break;
+        }
+
+
+        (variables, variable_names, asts, scope_return, return_line, return_token) = execute(scopes.clone(), asts, variables, variable_names, scope_line_asts.clone());
+
+        if return_line != -1 {
+        }
+
+        else {  //This means that the scope ended
+
+            if return_lines.len() == 1 {
+                println!("{} | {}", return_lines[0], lines.len());
+
+
+                for _ in 0..(return_lines[0] + 1) {
+                    lines.remove(0);
+                }
+
+
+                println!("{:?}", lines);
+
+                (variables, variable_names, asts, scope_return, return_line, return_token) = execute(lines.clone(), asts, variables, variable_names, line_asts.clone());
+            }
+        }
+        println!("{:?}", return_lines);
+    }
 
 
 
@@ -121,7 +163,7 @@ fn main() {
 
 
 
-fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut variables: Vec<VAR>, mut variable_names: Vec<String>, line_asts: Vec<Vec<i64>>) -> (Vec<VAR>, Vec<String>, Vec<parser::AST>, parser::AST, i64) {
+fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut variables: Vec<VAR>, mut variable_names: Vec<String>, line_asts: Vec<Vec<i64>>) -> (Vec<VAR>, Vec<String>, Vec<parser::AST>, parser::AST, i64, i64) {
     let mut skip: i32 = 0;
 
     let mut scope_return = parser::AST{ast_type: "NONE".to_string(), children: Vec::new()};
@@ -233,7 +275,7 @@ fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut varia
                 scope_return = to_add.2;
 
                 if scope_return.ast_type != "NONE" {
-                    return (variables, variable_names, asts, scope_return, line_num);
+                    return (variables, variable_names, asts, scope_return, line_num, token_num);
                 }
             }
 
@@ -248,7 +290,8 @@ fn execute(lines: Vec<Vec<parser::Token>>, mut asts: Vec<parser::AST>, mut varia
         println!("Name: {} | Type: {} | Value: {}", i.name, i.var_type, i.value);
     }*/
     
-    return (variables, variable_names, asts, scope_return, -1);
+    println!("{}", "DONE".blue());
+    return (variables, variable_names, asts, scope_return, -1, token_num);
 }
 
 

@@ -23,3 +23,5 @@ if (why = why) {
     println("SIIIGGGGMMMAAAA");
     println("MIMIMI");
 };
+
+println("hi");
